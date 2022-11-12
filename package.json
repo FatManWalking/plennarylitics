@@ -1,24 +1,5 @@
 {
-    "name": "plennarylitics",
-    "version": "1.0.0",
-    "description": "Monorepo for the plennarylitics web application and API server",
-    "private": true,
-    "scripts": {
-        "build": "turbo run build",
-        "dev": "turbo run dev --parallel",
-        "lint": "turbo run lint",
-        "format": "turbo run format"
-    },
-    "author": "Björn Bulkens",
-    "packageManager": "pnpm@7.12.1",
-    "devDependencies": {
-        "@types/cors": "^2.8.12",
-        "backend": "^1.1.1",
-        "frontend": "workspace:^0.0.1",
-        "turbo": "^1.5.4"
-    },
-    "workspaces": [
-        "backend",
-        "frontend"
-    ]
+	"devDependencies": {
+		"turbo": "^1.6.3"
+	}
 }

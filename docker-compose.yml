@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - TODO
+    environment:
+      - DATASTORE_PROJECT_ID=$DATASTORE_PROJECT_ID
+      - GOOGLE_APPLICATION_CREDENTIALS=
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    environment:
+      - BACKEND_URL=http://backend:8080
+    ports:
+      - "3000:3000"

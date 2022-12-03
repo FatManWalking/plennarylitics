@@ -11,7 +11,6 @@ RUN pnpm install --filter frontend
 
 # build application
 ADD ./frontend frontend
-ADD ./types types
 RUN pnpm run --dir frontend build
 
 FROM node:17-alpine

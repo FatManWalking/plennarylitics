@@ -33,6 +33,8 @@ Daniel M. Knorr (ax280@stud.uni-heidelberg.de)
 
 * Final implementation of the frontend and addition of visuals
 * Connection to the backend and exchange of data with the frontend
+* Implementation of more statistics
+* Connection of frontend and backend via FastAPI 
 
 
 ## Week 44/45

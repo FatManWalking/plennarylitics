@@ -51,6 +51,6 @@ A full-stack application to analyse plannary sessions in the German Bundestag us
 
 ## Week 50
 
-# The current state of affairs
+# Data Analysis
+![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 
-![alt text]([https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png))

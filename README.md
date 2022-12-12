@@ -54,3 +54,7 @@ A full-stack application to analyse plannary sessions in the German Bundestag us
 # Data Analysis
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 
+The Data sources we are using are the plenary protocols from the Bundesregierung. We get access to the protocols via an API-Key we got from the 
+Bundesregierung. In the current state of the project we don’t use all plenary protocols but only a small amount to test our code. This amount of protocols 
+belong to plenary protocols since 26.09.2021.
+

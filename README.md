@@ -34,30 +34,7 @@ Daniel M. Knorr (ax280@stud.uni-heidelberg.de)
 * Final implementation of the frontend and addition of visuals
 * Connection to the backend and exchange of data with the frontend
 * Implementation of more statistics
-* Connection of frontend and backend via FastAPI 
-
-
-## Week 44/45
-
-* Setting up project proposal
-  * defining goal
-  * defining work packages
-  * defining work distribution / member roles
-* Setting up repo and a blank sceleton for the web app (Björn)
-
-## Week 46
-
-
-## Week 47
-
-
-## Week 48
-
-
-## Week 49
-
-
-## Week 50
+* Connection of frontend and backend via FastAPI
 
 # Data Analysis
 
@@ -77,3 +54,30 @@ Up to this point, we are including 50 files from the current legislative period 
 
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 
+## Week 44/45
+
+* Setting up project proposal
+  * defining goal
+  * defining work packages
+  * defining work distribution / member roles
+* Setting up repo and a blank sceleton for the web app (Björn)
+
+## Week 46
+* Text Processing
+ * Preprocessing Single Plennar Documents to find patterns
+ * Planning Document Storage
+
+
+## Week 47/48
+* Setting up Frontend Functionalities
+* Setting up ElastiSearch to store Documents in predefinded way
+* Pulling documents directly from the API
+* Setting up barebone FastAPI scelton
+* Further preprocessing of files to generilize Process
+
+
+## Week 49
+* 
+
+
+## Week 50

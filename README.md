@@ -1,6 +1,12 @@
 # plennarylitics
 A full-stack application to analyse plannary sessions in the German Bundestag using Svelte(Kit), FastAPI and ElasticSearch
 
+## Team Members:
+
+Björn Bulkens (björn.bulkens@stud.uni-heidelberg.de)
+Klemens Gerber (klemens.gerber@stud.uni-heidelberg.de)
+Daniel M. Knorr (ax280@stud.uni-heidelberg.de)
+
 # Data Processing
 
 * Establish a connection to the Bundestag APi and request an API token
@@ -53,6 +59,9 @@ A full-stack application to analyse plannary sessions in the German Bundestag us
 
 # Data Analysis
 
+## Data Sources
+The Data sources we are using are the plenary protocols from the Bundesregierung. We get access to the protocols via an API-Key we got from the Bundesregierung. In the current state of the project we don’t use all plenary protocols but only a small amount to test our code. This amount of protocols belong to plenary protocols since 26.09.2021.
+
 ## Preprocessing
 The following steps were taken to preprocess the Data:
 * 1. Extraction of text from the XML Format
@@ -62,9 +71,7 @@ The preprocessing of the data was actually a smaller part of the data extraciton
 
 # Basic Statistics
 
-Up to this point, we are including 50 files from the current legislative period into elasticsearch. These include 7 Parties (SPD, AfD, CDU, BUENDNIS90/DIE GRUENEN, FDP, DIELINKE and FRAKTIONSLOS). For each of these parties, we save the missing MPs per plenary meeting, as well as the different speeches  per person. These speeches actually are the documents, we are saving in elasticsearch. 
-
-An example for the missing mps is the following graphic, we have drawn from elasticsearch, displaying the top 20 missing MPs for the AfD in the current 50 plennary meetings. 
+Up to this point, we are including 50 files from the current legislative period into elasticsearch. 
 
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 

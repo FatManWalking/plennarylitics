@@ -62,7 +62,9 @@ The preprocessing of the data was actually a smaller part of the data extraciton
 
 # Basic Statistics
 
-Up to this point, we are including 50 files from the current legislative period into elasticsearch. 
+Up to this point, we are including 50 files from the current legislative period into elasticsearch. These include 7 Parties (SPD, AfD, CDU, BUENDNIS90/DIE GRUENEN, FDP, DIELINKE and FRAKTIONSLOS). For each of these parties, we save the missing MPs per plenary meeting, as well as the different speeches  per person. These speeches actually are the documents, we are saving in elasticsearch. 
+
+An example for the missing mps is the following graphic, we have drawn from elasticsearch, displaying the top 20 missing MPs for the AfD in the current 50 plennary meetings. 
 
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 

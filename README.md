@@ -52,9 +52,17 @@ A full-stack application to analyse plannary sessions in the German Bundestag us
 ## Week 50
 
 # Data Analysis
-![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 
-The Data sources we are using are the plenary protocols from the Bundesregierung. We get access to the protocols via an API-Key we got from the 
-Bundesregierung. In the current state of the project we don’t use all plenary protocols but only a small amount to test our code. This amount of protocols 
-belong to plenary protocols since 26.09.2021.
+## Preprocessing
+The following steps were taken to preprocess the Data:
+* 1. Extraction of text from the XML Format
+* 2. Splitting into different parts (preamble, actual discussions, additional content)
+
+The preprocessing of the data was actually a smaller part of the data extraciton process, than making ourselves familiar with the differences in text structure. Our approach up to this point relies heavily splitting the long strings that we get from the Bundestag API into smaller, more manageable parts. This includes differenc speeches from MPs as well as answers from the plenum and other strings. Looking for these different strings to split on and making up for differences between different XML files was a very large part of the project.
+
+# Basic Statistics
+
+Up to this point, we are including 50 files from the current legislative period into elasticsearch. 
+
+![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 

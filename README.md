@@ -76,8 +76,8 @@ Up to this point, we are including 50 files from the current legislative period 
 * Further preprocessing of files to generilize Process
 
 
-## Week 49
-* 
+## Week 49/50
+* Dockerizing applications, while ensuring communication (work in process)
 
 
 ## Week 50

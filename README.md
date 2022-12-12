@@ -71,7 +71,7 @@ The preprocessing of the data was actually a smaller part of the data extraciton
 
 # Basic Statistics
 
-Up to this point, we are including 50 files from the current legislative period into elasticsearch. 
+Up to this point, we are including 50 files from the current legislative period into elasticsearch. For the current legislatice parties, we have split the documents into the speeches of the members of the parliament. These speeches are assiegned to the politician giving them and are the documents we are actually saving in elasticsearch. Additionally to this, we are currently saving the missing MPs on a per party basis. In the following graphic, we have for example the top 20 missing MPs by Number for the AfD in the curtrent legislative period. The statistic was extracted from the elasticsearch dashboard. 
 
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 

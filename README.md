@@ -3,7 +3,7 @@ A full-stack application to analyse plannary sessions in the German Bundestag us
 
 ## Team Members:
 
-Björn Bulkens (björn.bulkens@stud.uni-heidelberg.de)
+Björn Bulkens (bjoern.bulkens@stud.uni-heidelberg.de)
 Klemens Gerber (klemens.gerber@stud.uni-heidelberg.de)
 Daniel M. Knorr (ax280@stud.uni-heidelberg.de)
 

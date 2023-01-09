@@ -131,3 +131,5 @@ dmypy.json
 .pyre/
 
 **/node_modules
+#added
+.xml

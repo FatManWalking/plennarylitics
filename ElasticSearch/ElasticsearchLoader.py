@@ -10,10 +10,13 @@ from spacy.matcher import PhraseMatcher
 import os
 import pandas as pd
 
+nlp = spacy.load("de_core_news_sm")
+
 #define index names
 
-index_protokolle = "ghjkghjk"
-missing_index = "gjhkgjkghjk"
+index_protokolle = "f2_test_protokolle"
+missing_index = "f2_test_missing"
+index_remarks = "f2_test_remarks"
 
 # Function which returns last words
 
@@ -202,13 +205,39 @@ def get_missing_mps(document):
 
     return DIELINKE, CDUCSU, FDP, SPD, GRUENE, FRAKTIONSLOS, AFD, missing_mp_stats
 
-def get_remarks(text):
+def get_party(element):
+
+    remarking_party = []
+    if "SPD" in element:
+        remarking_party.append("SPD")
+        
+    if "CDU/CSU" in element:
+        remarking_party.append("CDU/CSU")
+    
+    if "AfD" in element:
+        remarking_party.append("AfD")
+
+    if "FDP" in element:
+        remarking_party.append("FDP")
+
+    if "DIE GRÜNEN" in element:
+        remarking_party.append("DIE GRÜNEN")
+
+    if "LINKE" in element:
+        remarking_party.append("LINKE")
+
+    if "FRAKTIONSLOS" in element:
+        remarking_party.append("FRAKTIONSLOS")
+
+    return remarking_party
+
+def get_remarks(meeting_id,date,text, name_speaker, party):
 
     parties = ['LINKE', 'BÜNDNIS 90', 'CDU/CSU', 'SPD', 'FDP', 'AfD', 'fraktionslos']
     remark_class = []
     remarks = []
-    remarking_party = []
 
+   
     potentialremarks = re.findall( '\((\n*?|[^)]*)\)', text)
 
     for element in potentialremarks:
@@ -217,81 +246,171 @@ def get_remarks(text):
                 remarks.append(element)
     
     for element in remarks:
+        remark_class = []
+        remarking_parties = []
+        remarking_persons =""
+        party_remarking_person = ""
+        cleanded_list = []
+        cleaned_text = ""
+
+
         if "Beifall" in element:
             remark_class.append("Beifall")
+            remarking_parties.append(get_party(element))
+
+            
             #einwürfe.remove(element)
         if "Lachen" in element:
             remark_class.append("Lachen")
+            remarking_parties.append(get_party(element))
+
             #einwürfe.remove(element)
         if "Heiterkeit" in element:
             remark_class.append("Heiterkeit")
+            remarking_parties.append(get_party(element))
+
+         
             #einwürfe.remove(element)
         if "Zuruf" in element:
             remark_class.append("Zuruf")
+            remarking_parties.append(get_party(element))
+
+        
             #einwürfe.remove(element)
         if "[SPD]:" in element:
             remark_class.append("Thematischer Zwischenruf")
+
+            party_remarking_person = "SPD"
+
+            list = element.split()
+            index = list.index('[SPD]:')
+            try:
+                remarking_persons = str(list[index - 2] +" "+ list[index - 1])
+            except:
+                remarking_persons = "None"
+
+            cleaned_list = element.split('[SPD]:')
+            cleaned_text = cleaned_list.pop()
+
             #einwürfe.remove(element)
         if "[CDU/CSU]:" in element:
             remark_class.append("Thematischer Zwischenruf")
+
+            party_remarking_person = "CDU/CSU"
+
+            list = element.split()
+            index = list.index('[CDU/CSU]:')
+            try:
+                remarking_persons = str(list[index - 2] +" "+ list[index - 1])
+            except:
+                remarking_persons = "None"
+
+            cleaned_list = element.split('[CDU/CSU]:')
+            cleaned_text = cleaned_list.pop()
+
+       
             #einwürfe.remove(element)
         if "[AfD]:" in element:
             remark_class.append("Thematischer Zwischenruf")
+
+            party_remarking_person = "AfD"
+
+            list = element.split()
+            index = list.index('[AfD]:')
+            try:
+                remarking_persons = str(list[index - 2] +" "+ list[index - 1])
+            except:
+                remarking_persons = "None"
+
+            cleaned_list = element.split('[AfD]:')
+            cleaned_text = cleaned_list.pop()
+           
             #einwürfe.remove(element)
         if "[FDP]:" in element:
             remark_class.append("Thematischer Zwischenruf")
+
+            party_remarking_person = "FDP"
+
+            list = element.split()
+            index = list.index('[FDP]:')
+            try:
+                remarking_persons = str(list[index - 2] +" "+ list[index - 1])
+            except:
+                remarking_persons = "None"
+
+            cleaned_list = element.split('[FDP]:')
+            cleaned_text = cleaned_list.pop()
+
             #einwürfe.remove(element)
         if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
             remark_class.append("Thematischer Zwischenruf")
+
+            party_remarking_person = "Bündnis 90/Die Grünen"
+
+            remarking_parties = []
+            list = element.split()
+            print(list)
+            index = list.index('[BÜNDNIS')
+            try:
+                remarking_persons = str(list[index - 2] +" "+ list[index - 1])
+            except:
+                remarking_persons = "None"
+
+            cleaned_list = element.split('[BÜNDNIS 90/DIE GRÜNEN]:')
+            cleaned_text = cleaned_list.pop()
+           
             #einwürfe.remove(element)
         if "[DIELINKE]:" in element:
             remark_class.append("Thematischer Zwischenruf")
+
+            party_remarking_person = "Die Linke"
+
+            list = element.split()
+            index = list.index('[DIELINKE]:')
+            try:
+                remarking_persons = str(list[index - 2] +" "+ list[index - 1])
+            except:
+                remarking_persons = "None"
+
+            cleaned_list = element.split('[DIELINKE]:')
+            cleaned_text = cleaned_list.pop()
+        
+        if "[DIE LINKE]:" in element:
+            remark_class.append("Thematischer Zwischenruf")
+
+            party_remarking_person = "Die Linke"
+
+            list = element.split()
+            
+            try:
+                index = list.index('[DIE LINKE]:')
+                remarking_persons = str(list[index - 2] +" "+ list[index - 1])
+            except:
+                remarking_persons = "None"
+
+            cleaned_list = element.split('[DIE LINKE]:')
+            cleaned_text = cleaned_list.pop()
+            
             #einwürfe.remove(element)
         if "[FRAKTIONSLOS]:" in element:
             remark_class.append("Thematischer Zwischenruf")
-            #einwürfe.remove(element)
-        if "SPD" in element:
-            remarking_party.append("SPD")
-        
-        if "CDU/CSU" in element:
-            remarking_party.append("CDU/CSU")
-        
-        if "AfD" in element:
-            remarking_party.append("AfD")
 
-        if "FDP" in element:
-            remarking_party.append("FDP")
-    
-        if "DIE GRÜNEN" in element:
-            remarking_party.append("DIE GRÜNEN")
+            party_remarking_person = "Fraktionslos"
 
-        if "LINKE" in element:
-            remarking_party.append("LINKE")
+            list = element.split()
+            index = list.index('[FRAKTIONSLOS]:')
+            try:
+                remarking_persons = str(list[index - 2] +" "+ list[index - 1])
+            except:
+                remarking_persons = "None"
 
-        if "FRAKTIONSLOS" in element:
-            remarking_party.append("FRAKTIONSLOS")
-        if len(remarking_party) > len(remark_class):
-            remark_class.extend(['X'] * (len(remarking_party)-len(remark_class)))
-        if len(remarking_party) < len(remark_class):
-            remarking_party.extend(['X'] * (len(remark_class)-len(remarking_party)))
-        if len(remarks) < len(remark_class):
-            remarks.extend(['X'] * (len(remark_class)-len(remarks)))
-        if len(remarks) < len(remarking_party):
-            remarks.extend(['X'] * (len(remarking_party)-len(remarks)))
-
-        
-
-    print(len(remarks), len(remark_class),len(remarking_party))
-
-    d = {'remark_text': remarks, 'remark_class': remark_class, 'remark_party': remarking_party}
-
-    df_remarks = pd.DataFrame(data=d)
-
-    return df_remarks
+            cleaned_list = element.split('[FRAKTIONSLOS]:')
+            cleaned_text = cleaned_list.pop()
+            
+        fill_elastic_remarks(meeting_id,date,element,name_speaker,party, remark_class,remarking_parties, remarking_persons,party_remarking_person, cleaned_text)
+        es.indices.refresh(index=index_remarks)
 
 def Preprocessing(document):
-
-
 
     meeting_content = str(document)
 
@@ -324,87 +443,38 @@ def Preprocessing(document):
 
     for idx, element in enumerate(party_split):
 
-        #Check if text was split on party name
-
         if element == "(DIE LINKE):":
-
-            #concat last words of previous split element (contains the referees name), actual split element (contains party name) and next split element (contains text of speech)
 
             Reden_Linke.append(lastWords(party_split[idx-1])+" "+party_split[idx]+" "+party_split[idx+1])
 
-            #Split on name of the moderator to mark the end of the speech and delete none speech text parts
-
             moderation_split = re.split("Präsident Dr. Wolfgang Schäuble:|Vizepräsident Dr. Hans-Peter Friedrich:", Reden_Linke[-1])
-            remarks_in_speech = get_remarks(moderation_split[0])
-            if remarks_in_speech.empty:
-                remarks_in_speech['remark_text'] = "No remarks"
-                remarks_in_speech['remark_class'] = "No remarks" 
-                remarks_in_speech['remark_party'] = "No remarks"
-            Remarks_Linke.append(remarks_in_speech)
             Reden_Linke[-1] = moderation_split[0]
         if element == "(AfD):":
             Reden_AfD.append(lastWords(party_split[idx-1])+" "+party_split[idx]+" "+party_split[idx+1])
             moderation_split = re.split("Präsident Dr. Wolfgang Schäuble:|Vizepräsident Dr. Hans-Peter Friedrich:", Reden_AfD[-1])
-            remarks_in_speech = get_remarks(moderation_split[0])
-            if remarks_in_speech.empty:
-                remarks_in_speech['remark_text'] = "No remarks"
-                remarks_in_speech['remark_class'] = "No remarks" 
-                remarks_in_speech['remark_party'] = "No remarks"
-            Remarks_AfD.append(remarks_in_speech)
             Reden_AfD[-1] = moderation_split[0]
         if element == "(BÜNDNIS 90/DIE GRÜNEN):":
             Reden_Gruene.append(lastWords(party_split[idx-1])+" "+party_split[idx]+" "+party_split[idx+1])
             moderation_split = re.split("Präsident Dr. Wolfgang Schäuble:|Vizepräsident Dr. Hans-Peter Friedrich:", Reden_Gruene[-1])
-            remarks_in_speech = get_remarks(moderation_split[0])
-            if remarks_in_speech.empty:
-                remarks_in_speech['remark_text'] = "No remarks"
-                remarks_in_speech['remark_class'] = "No remarks" 
-                remarks_in_speech['remark_party'] = "No remarks"
-            Remarks_Gruene.append(remarks_in_speech)
             Reden_Gruene[-1] = moderation_split[0]
         if element == "(CDU/CSU):":
             Reden_CDU.append(lastWords(party_split[idx-1])+" "+party_split[idx]+" "+party_split[idx+1])
             moderation_split = re.split("Präsident Dr. Wolfgang Schäuble:|Vizepräsident Dr. Hans-Peter Friedrich:", Reden_CDU[-1])
-            remarks_in_speech = get_remarks(moderation_split[0])
-            if remarks_in_speech.empty:
-                remarks_in_speech['remark_text'] = "No remarks"
-                remarks_in_speech['remark_class'] = "No remarks" 
-                remarks_in_speech['remark_party'] = "No remarks"
-            Remarks_CDU.append(remarks_in_speech)
             Reden_CDU[-1] = moderation_split[0]
         if element == "(FDP):":
             Reden_FDP.append(lastWords(party_split[idx-1])+" "+party_split[idx]+" "+party_split[idx+1])
             moderation_split = re.split("Präsident Dr. Wolfgang Schäuble:|Vizepräsident Dr. Hans-Peter Friedrich:", Reden_FDP[-1])
-            remarks_in_speech = get_remarks(moderation_split[0])
-            if remarks_in_speech.empty:
-                remarks_in_speech['remark_text'] = "No remarks"
-                remarks_in_speech['remark_class'] = "No remarks" 
-                remarks_in_speech['remark_party'] = "No remarks"
-            Remarks_FDP.append(remarks_in_speech)
             Reden_FDP[-1] = moderation_split[0]
         if element == "(FRAKTIONSLOS):":
             Reden_Fraktionslos.append(lastWords(party_split[idx-1])+" "+party_split[idx]+" "+party_split[idx+1])
             moderation_split = re.split("Präsident Dr. Wolfgang Schäuble:|Vizepräsident Dr. Hans-Peter Friedrich:", Reden_Fraktionslos[-1])
-            remarks_in_speech = get_remarks(moderation_split[0])
-            if remarks_in_speech.empty:
-                remarks_in_speech['remark_text'] = "No remarks"
-                remarks_in_speech['remark_class'] = "No remarks" 
-                remarks_in_speech['remark_party'] = "No remarks"
-            Remarks_Fraktionslos.append(remarks_in_speech)
             Reden_Fraktionslos[-1] = moderation_split[0]
         if element == "(SPD):":
             Reden_SPD.append(lastWords(party_split[idx-1])+" "+party_split[idx]+" "+party_split[idx+1])
             moderation_split = re.split("Präsident Dr. Wolfgang Schäuble:|Vizepräsident Dr. Hans-Peter Friedrich:", Reden_SPD[-1])
-            remarks_in_speech = get_remarks(moderation_split[0])
-            if remarks_in_speech.empty:
-                remarks_in_speech['remark_text'] = "No remarks"
-                remarks_in_speech['remark_class'] = "No remarks" 
-                remarks_in_speech['remark_party'] = "No remarks"
-            Remarks_SPD.append(remarks_in_speech)
             Reden_SPD[-1] = moderation_split[0]
 
-    return Reden_AfD, Reden_CDU, Reden_FDP, Reden_Fraktionslos, Reden_Gruene, Reden_Linke, Reden_SPD, Remarks_Linke, Remarks_AfD, Remarks_Gruene, Remarks_CDU, Remarks_FDP, Remarks_Fraktionslos, Remarks_SPD 
-
+    return Reden_AfD, Reden_CDU, Reden_FDP, Reden_Fraktionslos, Reden_Gruene, Reden_Linke, Reden_SPD
 
 def  convert_text(text):
     return text
@@ -412,7 +482,7 @@ def  convert_text(text):
 def  delete_elastic_index():
     es.options(ignore_status=[400,404]).indices.delete(index=index_protokolle)
 
-def fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher,remarks):
+def fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher):
     #print("Verarbeite Dokument: ", document['dokumentnummer'])
     doc = {
         'Dokumentnummer': meeting_id,
@@ -422,12 +492,30 @@ def fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher,rema
         'Titel': title,
         'Organ': publisher,
         'Text': element,
-        'Remarks': element
     }
 
     idDokumentennummer = re.sub("/", "", meeting_id)
     print("idDokumentennummer: " + idDokumentennummer)
     resp = es.index(index=index_protokolle,  body=doc)
+
+def fill_elastic_remarks(meeting_id,date,element,name_speaker,party, remark_class,remarking_parties, remarking_persons, party_remarking_person, cleaned_text):
+    #print("Verarbeite Dokument: ", document['dokumentnummer'])
+    doc = {
+        'Dokumentnummer': meeting_id,
+        'Sprecher der Rede': name_speaker,
+        'Partei des Sprechers der Rede': party,
+        'Datum': date,
+        'Remark Class': remark_class,
+        'Remarking Parties': remarking_parties,
+        'Text': element,
+        'Remarking Persons' : remarking_persons,
+        'Party Remarking Person': party_remarking_person,
+        'Remark Text': cleaned_text
+    }
+
+    idDokumentennummer = re.sub("/", "", meeting_id)
+    print("idDokumentennummer: " + idDokumentennummer)
+    resp = es.index(index=index_remarks,  body=doc)
 
 def fill_elastic_missing( meeting_id,date,title,missing_DIELINKE, missing_CDUCSU, missing_FDP, missing_SPD, missing_GRUENE, missing_FRAKTIONSLOS, missing_AFD):
     #print("Verarbeite Dokument: ", document['dokumentnummer'])
@@ -446,7 +534,7 @@ def fill_elastic_missing( meeting_id,date,title,missing_DIELINKE, missing_CDUCSU
 
     idDokumentennummer = re.sub("/", "", meeting_id)
     print("idDokumentennummer: " + idDokumentennummer)
-    es.index(index=missing_index,  body=doc)
+    resp = es.index(index=missing_index,  body=doc)
 
 def fill_loop(dictionary):
 
@@ -461,50 +549,51 @@ def fill_loop(dictionary):
 
         missing_DIELINKE, missing_CDUCSU, missing_FDP, missing_SPD, missing_GRUENE, missing_FRAKTIONSLOS, missing_AFD, missing_mp_stats = get_missing_mps(document['text'])
 
-        #fill_elastic_missing(meeting_id,date,title,missing_DIELINKE, missing_CDUCSU, missing_FDP, missing_SPD, missing_GRUENE, missing_FRAKTIONSLOS, missing_AFD)
+        fill_elastic_missing(meeting_id,date,title,missing_DIELINKE, missing_CDUCSU, missing_FDP, missing_SPD, missing_GRUENE, missing_FRAKTIONSLOS, missing_AFD)
         
-        Reden_AfD, Reden_CDU, Reden_FDP, Reden_Fraktionslos, Reden_Gruene, Reden_Linke, Reden_SPD, Remarks_Linke, Remarks_AfD, Remarks_Gruene, Remarks_CDU, Remarks_FDP, Remarks_Fraktionslos, Remarks_SPD = Preprocessing(str(document['text']))
+        Reden_AfD, Reden_CDU, Reden_FDP, Reden_Fraktionslos, Reden_Gruene, Reden_Linke, Reden_SPD= Preprocessing(str(document['text']))
         
         for element in Reden_AfD:
-            index = Reden_AfD.index(element)
             name_speaker = element.split()[:2]
             party="AfD"
-            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher, Remarks_AfD[index])
+            get_remarks(meeting_id,date,element, name_speaker, party)
+            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher)
 
 
         for element in Reden_CDU:
             name_speaker = element.split()[:2]
             party="CDU"
-            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher, Remarks_CDU[index])
+            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher)
 
         for element in Reden_FDP:
             name_speaker = element.split()[:2]
             party="FDP"
-            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher, Remarks_FDP[index])
+            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher)
     
         for element in Reden_Fraktionslos:
             name_speaker = element.split()[:2]
             party="Fraktionslos"
-            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher, Remarks_Fraktionslos[index])
+            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher)
     
         for element in Reden_Gruene:
             name_speaker = element.split()[:2]
             party="Bündnis 90/Die Grünen"
-            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher, Remarks_Gruene[index])
+            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher)
     
         for element in Reden_Linke:
             name_speaker = element.split()[:2]
             party="Die Linke"
-            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher, Remarks_Linke[index])
+            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher)
         
         for element in Reden_SPD:
             name_speaker = element.split()[:2]
             party="SPD"
-            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher, Remarks_SPD[index])
+            fill_elastic(element,name_speaker,meeting_id,party,date,title,publisher)
        
 
     es.indices.refresh(index=index_protokolle)
     es.indices.refresh(index=missing_index)
+    es.indices.refresh(index=index_remarks)
     result = es.count(index=index_protokolle)
     geladeneProtkolle = result['count']
     print("Anzahl Protokolle", geladeneProtkolle)

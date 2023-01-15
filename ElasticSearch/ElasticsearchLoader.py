@@ -1,16 +1,17 @@
 from elasticsearch import Elasticsearch
 import requests
 import re
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
 import re
-import spacy
-from spacy import displacy
-from spacy.matcher import Matcher
-from spacy.matcher import PhraseMatcher
-import os
-import pandas as pd
+#import spacy
+#from spacy import displacy
+#from spacy.matcher import Matcher
+#from spacy.matcher import PhraseMatcher
+#
+#import os
+#import pandas as pd
 
-nlp = spacy.load("de_core_news_sm")
+#nlp = spacy.load("de_core_news_sm")
 
 #define index names
 
@@ -599,7 +600,7 @@ def fill_loop(dictionary):
     print("Anzahl Protokolle", geladeneProtkolle)
 
 es = Elasticsearch("http://localhost:9200",
-    verify_certs=False, timeout=60,retry_on_timeout =True, max_retries = 5,use_ssl=False) # Security not enabled
+    verify_certs=False, timeout=60,retry_on_timeout =True, max_retries = 5) # Security not enabled
 api_url = "https://search.dip.bundestag.de/api/v1/plenarprotokoll-text?f.datum.start=2021-09-26&apikey=ECrwIai.ErBmVaihLIzqiqu9DqNoVFVvUysTzDwuOo"
 
 

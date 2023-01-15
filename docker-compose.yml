@@ -31,6 +31,24 @@ services:
       - es-net
   ### Non-image services
 
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DEBUG: 1
+    volumes:
+      - ./backend/app:/code/app
+    depends_on:
+      - db
+    networks:
+      - es-net
+
+networks:
+  es-net:
+    driver: bridge
   # frontend:
   #   build:
   #     context: .
@@ -41,14 +59,3 @@ services:
   #     - "3000:3000"
   #   depends_on:
   #     - backend
-
-  # backend:
-  #   build:
-  #     context: .
-  #     dockerfile: ./backend/Dockerfile
-  #   ports:
-  #     - "8080:8080"
-
-networks:
-  es-net:
-    driver: bridge

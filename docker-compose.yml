@@ -1,14 +1,35 @@
+volumes:
+  elasticdata:
+    driver: local
+
 services:
-  frontend:
-    build:
-      context: .
-      dockerfile: ./frontend/Dockerfile
+
+  ### Images
+  db:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
+    container_name: elasticsearch
     environment:
-      - Backend_URL=http://backend:8080
+      - "discovery.type=single-node"
+      - xpack.security.enabled=false
     ports:
-      - "3000:3000"
+      - "9200:9200"
+    volumes:
+      - elasticdata:/usr/share/elasticsearch/data
+    networks:
+      - es-net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.8
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
-      - backend
+      - elasticsearch
+    networks:
+      - es-net
+  ### Non-image services
 
   backend:
     build:
@@ -16,3 +37,25 @@ services:
       dockerfile: ./backend/Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      DEBUG: 1
+    volumes:
+      - ./backend/app:/code/app
+    depends_on:
+      - db
+    networks:
+      - es-net
+
+networks:
+  es-net:
+    driver: bridge
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: ./frontend/Dockerfile
+  #   environment:
+  #     - Backend_URL=http://backend:8080
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend

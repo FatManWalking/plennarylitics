@@ -26,7 +26,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
-      - elasticsearch
+      - db
     networks:
       - es-net
   ### Non-image services

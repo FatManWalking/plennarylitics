@@ -14,4 +14,10 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./backend/app /code/app
 
 # 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "", "--reload"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+
+#
+COPY ./backend/ES_Init.py /code/ES_Init.py
+
+#
+RUN python ES_Init.py

@@ -6,27 +6,24 @@ from typing import List, Dict, Tuple, Any, TypeVar, Generator
 Document = TypeVar("Document")
 
 # define elasticsearch connection
-try:
-    es = Elasticsearch(
-        "http://elasticsearch:9200",
-        verify_certs=False,
-        timeout=60,
-        retry_on_timeout=True,
-        max_retries=5,
-    )  # Security not enabled
-except Exception as e:
-    AssertionError(
-        f"Elasticsearch connection failed. Please check your connection and that Host and Port in the config file are correct. Error: {e}"
-    )
+
+es = Elasticsearch(
+    "http://localhost:9200",
+    verify_certs=False,
+    timeout=60,
+    retry_on_timeout=True,
+    max_retries=5,
+)  # Security not enabled
+
 
 # define api url to get all plenary protocols
 api_url = "https://search.dip.bundestag.de/api/v1/plenarprotokoll-text?f.datum.start=2021-09-26&apikey=ECrwIai.ErBmVaihLIzqiqu9DqNoVFVvUysTzDwuOo"
 
 
 # define index names
-index_protokolle = "f2_test_protokolle"
-missing_index = "f2_test_missing"
-index_remarks = "f2_test_remarks"
+index_protokolle = "f3_test_protokolle"
+missing_index = "f3_test_missing"
+index_remarks = "f3_test_remarks"
 
 
 def lastWords(string: str) -> str:
@@ -110,7 +107,7 @@ def get_missing_mps(document: str) -> tuple:
 
                 party_dict[party].append(name)
 
-                continue
+                break
 
     # Here the complete names of missing mps per meeting are added to a dictionary with the meeting id in format "19XXX" as a key
 
@@ -125,7 +122,7 @@ def get_missing_mps(document: str) -> tuple:
     }
 
     return (
-        party_dict["Die Linke"],
+        party_dict["DIE LINKE"],
         party_dict["CDU/CSU"],
         party_dict["SPD"],
         party_dict["AfD"],
@@ -196,7 +193,7 @@ def get_remarks(
                 remark_class.append(type)
                 remarking_parties.append(get_party(element))
 
-                continue
+                break
 
         # TODO: Are the [] really necessary? If no we could directly use the party name
         for party in [
@@ -204,10 +201,10 @@ def get_remarks(
             "[CDU/CSU]:",
             "[AfD]:",
             "[FDP]:",
-            "[DIE LINKE]:",
+            "[DIE",
             "[DIELINKE]:",
-            "[BÜNDNIS 90/DIE GRÜNEN]:",
-            "[fraktionslos]:",
+            "[BÜNDNIS",
+            "[FRAKTIONSLOS]:",
         ]:
             if party in element:
                 party_remarking_person = party[1:-2]
@@ -222,7 +219,7 @@ def get_remarks(
                 cleaned_list = element.split(party)
                 cleaned_text = cleaned_list.pop()
 
-                continue
+                break
 
         if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
             remark_class.append("Thematischer Zwischenruf")
@@ -336,7 +333,7 @@ def Preprocessing(document: Any) -> Generator[list, None, None]:
                     party_dict[party][-1],
                 )
                 party_dict[party][-1] = moderation_split[0]
-                continue
+                break
 
     # TODO: There is always only one none empty element in the list. Correct?
     return (speech for speech in party_dict.values())
@@ -455,7 +452,7 @@ def fill_loop(dictionary: dict):
     """
     for document in dictionary["documents"]:
         if "text" not in document:
-            continue
+            break
         meeting_id = document["dokumentnummer"]
         date = (document["datum"],)
         title = (document["titel"],)

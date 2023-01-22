@@ -103,13 +103,13 @@ def get_missing_mps(document: str) -> tuple:
                     switchnames = element[0].split(",")
                     name = switchnames[1] + " " + switchnames[0]
 
-                except IndexError:
-                    print("Index out of bounds for switchnames. Unordered name is used instead")
+                except IndexError as e:
+                    print(e,"Index out of bounds for switchnames. Unordered name is used instead")
                     name = element[0]
 
                 party_dict[party].append(name)
 
-                continue
+                break
 
     # Here the complete names of missing mps per meeting are added to a dictionary with the meeting id in format "19XXX" as a key
 
@@ -193,7 +193,7 @@ def get_remarks(
                 remark_class.append(type)
                 remarking_parties.append(get_party(element))
 
-                continue
+                break
 
         # TODO: Are the [] really necessary? If no we could directly use the party name
         # Yes they are necessary
@@ -205,7 +205,7 @@ def get_remarks(
             "[DIE LINKE]:",
             "[DIELINKE]:",
             "[BÜNDNIS 90/DIE GRÜNEN]:",
-            "[fraktionslos]:",
+            "[FRAKTIONSLOS]:",
         ]:
             if party in element:
                 party_remarking_person = party[1:-2]
@@ -214,14 +214,14 @@ def get_remarks(
                 try:
                     remarking_persons = str(list[index - 2] + " " + list[index - 1])
 
-                except ValueError:
-                    print("No remarkign Person found")
+                except ValueError as e:
+                    print(e,"No remarkign Person found")
                     remarking_persons = "None"
 
                 cleaned_list = element.split(party)
                 cleaned_text = cleaned_list.pop()
 
-                continue
+                break
 
         if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
             remark_class.append("Thematischer Zwischenruf")
@@ -263,18 +263,18 @@ def get_remarks(
 
         if "[DIE LINKE]:" in element:
             remark_class.append("Thematischer Zwischenruf")
-
+            element = element.replace("[DIE LINKE]:","[DIELINKE]:")
             party_remarking_person = "Die Linke"
 
             list = element.split()
 
             try:
-                index = list.index("[DIE LINKE]:")
+                index = list.index("[DIELINKE]:")
                 remarking_persons = str(list[index - 2] + " " + list[index - 1])
             except:
                 remarking_persons = "None"
 
-            cleaned_list = element.split("[DIE LINKE]:")
+            cleaned_list = element.split("[DIELINKE]:")
             cleaned_text = cleaned_list.pop()
 
         fill_elastic_remarks(
@@ -339,7 +339,7 @@ def Preprocessing(document: Any) -> Generator[list, None, None]:
                     party_dict[party][-1],
                 )
                 party_dict[party][-1] = moderation_split[0]
-                continue
+                break
 
     # TODO: There is always only one none empty element in the list. Correct?
     # No there are the speeches per party in the dictionary
@@ -452,7 +452,7 @@ def fill_loop(dictionary: dict):
     """
     for document in dictionary["documents"]:
         if "text" not in document:
-            continue
+            break
         meeting_id = document["dokumentnummer"]
         date = (document["datum"],)
         title = (document["titel"],)

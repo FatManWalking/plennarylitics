@@ -1,6 +1,9 @@
 from elasticsearch import Elasticsearch
 import requests
 import re
+from typing import List, Dict, Tuple, Any, TypeVar, Generator
+
+Document = TypeVar("Document")
 
 # define elasticsearch connection
 try:
@@ -133,8 +136,12 @@ def get_missing_mps(document: str) -> tuple:
     )
 
 
-def get_party(element):
-
+def get_party(element: str) -> list:
+    """
+    This function returns a list of parties that are mentioned in a string
+    parameter: element (string)
+    return: list
+    """
     remarking_party = []
 
     for party in [
@@ -152,7 +159,16 @@ def get_party(element):
     return remarking_party
 
 
-def get_remarks(meeting_id, date, text, name_speaker, party):
+# TODO: Is date a string or a datetime object? Then please add a type hint
+# For datetime just write date: "datetime" and for string "date: str"
+def get_remarks(
+    meeting_id: int, date, text: str, name_speaker: str, party: str
+) -> None:
+    """
+    Fills the remarks index with remarks made by MPs
+    parameter: meeting_id (int), date (datetime), text (string), name_speaker (string), party (string)
+    return: None
+    """
 
     parties = ["LINKE", "BÜNDNIS 90", "CDU/CSU", "SPD", "FDP", "AfD", "fraktionslos"]
     remark_class = []
@@ -274,8 +290,13 @@ def get_remarks(meeting_id, date, text, name_speaker, party):
         es.indices.refresh(index=index_remarks)
 
 
-def Preprocessing(document):
-
+# TODO: Is document a string or a list? Then please add a type hint
+def Preprocessing(document: Any) -> Generator[list, None, None]:
+    """
+    Preprocessing of the text
+    parameter: document (string)
+    return: tuple of strings
+    """
     meeting_content = str(document)
 
     meeting_content = " ".join(line.strip() for line in meeting_content.splitlines())
@@ -288,23 +309,14 @@ def Preprocessing(document):
     )
 
     # Splitting text into talking points
-
-    Reden_Linke = []
-    Reden_AfD = []
-    Reden_Gruene = []
-    Reden_CDU = []
-    Reden_FDP = []
-    Reden_Fraktionslos = []
-    Reden_SPD = []
-
     party_dict = {
-        "(DIE LINKE):": Reden_Linke,
-        "(AfD):": Reden_AfD,
-        "(BÜNDNIS 90/DIE GRÜNEN):": Reden_Gruene,
-        "(CDU/CSU):": Reden_CDU,
-        "(FDP):": Reden_FDP,
-        "FRAKTIONSLOS:": Reden_Fraktionslos,
-        "(SPD):": Reden_SPD,
+        "(DIE LINKE):": [],
+        "(AfD):": [],
+        "(BÜNDNIS 90/DIE GRÜNEN):": [],
+        "(CDU/CSU):": [],
+        "(FDP):": [],
+        "FRAKTIONSLOS:": [],
+        "(SPD):": [],
     }
 
     for idx, element in enumerate(party_split):
@@ -330,16 +342,30 @@ def Preprocessing(document):
     return (speech for speech in party_dict.values())
 
 
+# TODO: This function does absolutely nothing. Please remove it
 def convert_text(text):
     return text
 
 
 def delete_elastic_index():
+    """
+    Deletes the elastic index"""
     es.options(ignore_status=[400, 404]).indices.delete(index=index_protokolle)
 
 
-def fill_elastic(element, name_speaker, meeting_id, party, date, title, publisher):
-    # print("Verarbeite Dokument: ", document['dokumentnummer'])
+# TODO: What type is date? Please add a type hint
+def fill_elastic(
+    element: str,
+    name_speaker: str,
+    meeting_id: int,
+    party: str,
+    date,
+    title: str,
+    publisher: str,
+):
+    """
+    Fills the elastic index with the data from the document
+    """
     doc = {
         "Dokumentnummer": meeting_id,
         "Sprecher": name_speaker,
@@ -355,6 +381,7 @@ def fill_elastic(element, name_speaker, meeting_id, party, date, title, publishe
     resp = es.index(index=index_protokolle, body=doc)
 
 
+# TODO: What type is date? Please add a type hint
 def fill_elastic_remarks(
     meeting_id,
     date,
@@ -367,7 +394,9 @@ def fill_elastic_remarks(
     party_remarking_person,
     cleaned_text,
 ):
-    # print("Verarbeite Dokument: ", document['dokumentnummer'])
+    """
+    Fills the elastic index with the data from the document
+    """
     doc = {
         "Dokumentnummer": meeting_id,
         "Sprecher der Rede": name_speaker,
@@ -386,6 +415,7 @@ def fill_elastic_remarks(
     resp = es.index(index=index_remarks, body=doc)
 
 
+# TODO: What type is date? Please add a type hint
 def fill_elastic_missing(
     meeting_id,
     date,
@@ -398,7 +428,9 @@ def fill_elastic_missing(
     missing_FRAKTIONSLOS,
     missing_AFD,
 ):
-    # print("Verarbeite Dokument: ", document['dokumentnummer'])
+    """
+    Fills the elastic index with the data from the document
+    """
     doc = {
         "Dokumentnummer": meeting_id,
         "missing_DIELINKE": missing_DIELINKE,
@@ -417,8 +449,10 @@ def fill_elastic_missing(
     resp = es.index(index=missing_index, body=doc)
 
 
-def fill_loop(dictionary):
-
+def fill_loop(dictionary: dict):
+    """
+    Fills the elastic index with the data from the document
+    """
     for document in dictionary["documents"]:
         if "text" not in document:
             continue

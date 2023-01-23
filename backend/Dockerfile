@@ -18,6 +18,3 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload
 
 #
 COPY ./backend/ES_Init.py /code/ES_Init.py
-
-#
-RUN python ES_Init.py

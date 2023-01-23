@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch
+from elasticsearch import __version__ as es_version
 import requests
 import re
 from typing import List, Dict, Tuple, Any, Generator
@@ -563,24 +564,27 @@ def establish_elastic_connection():
     Returns: Elasticsearch object
     """
     # define elasticsearch connection
-    try:
-        es = Elasticsearch(
-            "http://localhost:9200",
-            verify_certs=False,
-            request_timeout=60,
-            retry_on_timeout=True,
-            max_retries=5,
-        )  # Security not enabled
+
+    es = Elasticsearch(
+        "http://elasticsearch:9200",
+        verify_certs=False,
+        request_timeout=60,
+        retry_on_timeout=True,
+        max_retries=5,
+    )  # Security not enabled
+
+    # check if connection is established
+    if es.ping():
+        print("Elasticsearch connection established.")
         return es
-    except Exception as e:
-        AssertionError(
-            f"Elasticsearch connection failed. Please check your connection and that Host and Port in the config file are correct. Error: {e}"
-        )
+    else:
+        print("Elasticsearch connection failed.")
         return None
 
 
 if __name__ == "__main__":
-
+    # Elasticsearch connection
+    print(f"Elasticsearch Version: {es_version}")
     es = establish_elastic_connection()
     if es is None:
         raise AssertionError("Elasticsearch connection failed.")

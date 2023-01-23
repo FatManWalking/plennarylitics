@@ -25,7 +25,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
-      - db
+      - elasticsearch
     networks:
       - es-net
   ### Non-image services
@@ -43,6 +43,18 @@ services:
       - ./backend/app:/code/app
     depends_on:
       - kibana
+    networks:
+      - es-net
+
+  backend-setup:
+    container_name: backend-setup
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    depends_on:
+      - backend
+    restart: "no"
+    entrypoint: /bin/bash -c "sleep 30 && python /code/ES_Init.py"
     networks:
       - es-net
 

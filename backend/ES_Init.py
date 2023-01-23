@@ -1,32 +1,16 @@
 from elasticsearch import Elasticsearch
 import requests
 import re
-from typing import List, Dict, Tuple, Any, TypeVar, Generator
-
-Document = TypeVar("Document")
-
-# define elasticsearch connection
-try:
-    es = Elasticsearch(
-        "http://localhost:9200",
-        verify_certs=False,
-        timeout=60,
-        retry_on_timeout=True,
-        max_retries=5,
-    )  # Security not enabled
-except Exception as e:
-    AssertionError(
-        f"Elasticsearch connection failed. Please check your connection and that Host and Port in the config file are correct. Error: {e}"
-    )
-
-# define api url to get all plenary protocols
-api_url = "https://search.dip.bundestag.de/api/v1/plenarprotokoll-text?f.datum.start=2021-09-26&apikey=ECrwIai.ErBmVaihLIzqiqu9DqNoVFVvUysTzDwuOo"
-
+from typing import List, Dict, Tuple, Any, Generator
 
 # define index names
-index_protokolle = "f2_test_protokolle"
-missing_index = "f2_test_missing"
-index_remarks = "f2_test_remarks"
+index_protokolle = "bjoerns_test_protokolle"
+missing_index = "bjoerns_test_missing"
+index_remarks = "bjoerns_test_remarks"
+
+counter = 0
+last_counter = 0
+last_idDokumentennummer = ""
 
 
 def lastWords(string: str) -> str:
@@ -104,7 +88,9 @@ def get_missing_mps(document: str) -> tuple:
                     name = switchnames[1] + " " + switchnames[0]
 
                 except IndexError as e:
-                    print(e,"Index out of bounds for switchnames. Unordered name is used instead")
+                    # print(
+                    #     e,"Index out of bounds for switchnames. Unordered name is used instead",
+                    # )
                     name = element[0]
 
                 party_dict[party].append(name)
@@ -124,7 +110,7 @@ def get_missing_mps(document: str) -> tuple:
     }
 
     return (
-        party_dict["Die Linke"],
+        party_dict["DIE LINKE"],
         party_dict["CDU/CSU"],
         party_dict["SPD"],
         party_dict["AfD"],
@@ -157,8 +143,14 @@ def get_party(element: str) -> list:
 
     return remarking_party
 
+
 def get_remarks(
-    meeting_id: int, date: str, text: str, name_speaker: str, party: str
+    es: Elasticsearch,
+    meeting_id: int,
+    date: tuple,
+    text: str,
+    name_speaker: str,
+    party: str,
 ) -> None:
     """
     Fills the remarks index with remarks made by MPs
@@ -181,30 +173,17 @@ def get_remarks(
         remark_class = []
         remarking_parties = []
 
-        # TODO: None of these variables are needed, you dont have to initialize them
-        # Got referenced before assignment error when not initializing
-        remarking_persons = ""
-        party_remarking_person = ""
-        cleaned_list = []
-        cleaned_text = ""
-
         for type in ["Beifall", "Lachen", "Heiterkeit", "Zuruf"]:
             if type in element:
                 remark_class.append(type)
                 remarking_parties.append(get_party(element))
 
-                break
-
-        # TODO: Are the [] really necessary? If no we could directly use the party name
-        # Yes they are necessary
         for party in [
             "[SPD]:",
             "[CDU/CSU]:",
             "[AfD]:",
             "[FDP]:",
-            "[DIE LINKE]:",
             "[DIELINKE]:",
-            "[BÜNDNIS 90/DIE GRÜNEN]:",
             "[FRAKTIONSLOS]:",
         ]:
             if party in element:
@@ -212,11 +191,11 @@ def get_remarks(
                 list = element.split()
                 index = list.index(party)
                 try:
-                    remarking_persons = str(list[index - 2] + " " + list[index - 1])
+                    remarking_person = str(list[index - 2] + " " + list[index - 1])
 
                 except ValueError as e:
-                    print(e,"No remarkign Person found")
-                    remarking_persons = "None"
+                    # print(e, "No remarkign Person found")
+                    remarking_person = "None"
 
                 cleaned_list = element.split(party)
                 cleaned_text = cleaned_list.pop()
@@ -230,54 +209,40 @@ def get_remarks(
 
             remarking_parties = []
             list = element.split()
-            print(list)
-            # TODO: Isnt a ]: missing here?
-            # No, the split splits the party name in half
-            # TODO: Is it ok to handle it like above? If yes we could use the same code for all parties
-            # Yes should be okay
+            # print(list)
+
             index = list.index("[BÜNDNIS")
             try:
-                remarking_persons = str(list[index - 2] + " " + list[index - 1])
+                remarking_person = str(list[index - 2] + " " + list[index - 1])
             except:
-                remarking_persons = "None"
+                remarking_person = "None"
 
             cleaned_list = element.split("[BÜNDNIS 90/DIE GRÜNEN]:")
             cleaned_text = cleaned_list.pop()
 
-        # TODO: Why are there two different ways to handle die linke regarding the index?
-        # Die Linke is not spelled consistently in the docs
-        if "[DIELINKE]:" in element:
-            remark_class.append("Thematischer Zwischenruf")
-
-            party_remarking_person = "Die Linke"
-
-            list = element.split()
-            index = list.index("[DIELINKE]:")
-            try:
-                remarking_persons = str(list[index - 2] + " " + list[index - 1])
-            except:
-                remarking_persons = "None"
-
-            cleaned_list = element.split("[DIELINKE]:")
-            cleaned_text = cleaned_list.pop()
-
         if "[DIE LINKE]:" in element:
             remark_class.append("Thematischer Zwischenruf")
-            element = element.replace("[DIE LINKE]:","[DIELINKE]:")
+            element = element.replace("[DIE LINKE]:", "[DIELINKE]:")
             party_remarking_person = "Die Linke"
 
             list = element.split()
 
             try:
                 index = list.index("[DIELINKE]:")
-                remarking_persons = str(list[index - 2] + " " + list[index - 1])
+                remarking_person = str(list[index - 2] + " " + list[index - 1])
             except:
-                remarking_persons = "None"
+                remarking_person = "None"
 
             cleaned_list = element.split("[DIELINKE]:")
             cleaned_text = cleaned_list.pop()
 
+        else:
+            remarking_person = "None"
+            party_remarking_person = "None"
+            cleaned_text = element
+
         fill_elastic_remarks(
+            es,
             meeting_id,
             date,
             element,
@@ -285,15 +250,13 @@ def get_remarks(
             party,
             remark_class,
             remarking_parties,
-            remarking_persons,
+            remarking_person,
             party_remarking_person,
             cleaned_text,
         )
         es.indices.refresh(index=index_remarks)
 
 
-# TODO: Is document a string or a list? Then please add a type hint
-# Any is okay, document is converted to string in the function
 def Preprocessing(document: Any) -> Generator[list, None, None]:
     """
     Preprocessing of the text
@@ -345,17 +308,39 @@ def Preprocessing(document: Any) -> Generator[list, None, None]:
     # No there are the speeches per party in the dictionary
     return (speech for speech in party_dict.values())
 
-def delete_elastic_index():
+
+def delete_elastic_index(es: Elasticsearch, index_protokolle: str):
     """
     Deletes the elastic index"""
     es.options(ignore_status=[400, 404]).indices.delete(index=index_protokolle)
 
+
+def counter_function(idDokumentennummer: str):
+    """
+    Counter for the id of the elastic index
+    While the idDokumentennummer is the same, the counter is increased
+    Yields the counter
+    """
+
+    global counter
+    global last_counter
+    global last_idDokumentennummer
+    if idDokumentennummer == last_idDokumentennummer:
+        counter += 1
+    else:
+        last_counter = counter
+        counter = 0
+    last_idDokumentennummer = idDokumentennummer
+    return counter, last_counter
+
+
 def fill_elastic(
+    es: Elasticsearch,
     element: str,
     name_speaker: str,
     meeting_id: int,
     party: str,
-    date: str,
+    date: tuple,
     title: str,
     publisher: str,
 ):
@@ -373,22 +358,29 @@ def fill_elastic(
     }
 
     idDokumentennummer = re.sub("/", "", meeting_id)
-    print("idDokumentennummer: " + idDokumentennummer)
-    resp = es.index(index=index_protokolle, body=doc)
-
+    counter, last_counter = counter_function(idDokumentennummer)
+    if counter == 0:
+        print(
+            f"Indexing {idDokumentennummer} - complete with {last_counter} entries",
+            end="\n",
+        )
+    else:
+        print(f"Indexing {idDokumentennummer} - {counter}", end="\r")
+    es.index(index=index_protokolle, document=doc)
 
 
 def fill_elastic_remarks(
+    es: Elasticsearch,
     meeting_id: int,
-    date: str,
+    date: tuple,
     element: str,
     name_speaker: str,
     party: str,
     remark_class: list,
     remarking_parties: list,
-    remarking_persons: list,
+    remarking_persons: str,
     party_remarking_person: str,
-    cleaned_text: str
+    cleaned_text: str,
 ):
     """
     Fills the elastic index with the data from the document
@@ -407,23 +399,29 @@ def fill_elastic_remarks(
     }
 
     idDokumentennummer = re.sub("/", "", meeting_id)
-    print("idDokumentennummer: " + idDokumentennummer)
-    resp = es.index(index=index_remarks, body=doc)
-
-
+    counter, last_counter = counter_function(idDokumentennummer)
+    if counter == 0:
+        print(
+            f"Indexing {idDokumentennummer} - complete with {last_counter} entries",
+            end="\n",
+        )
+    else:
+        print(f"Indexing {idDokumentennummer} - {counter}", end="\r")
+    es.index(index=index_remarks, document=doc)
 
 
 def fill_elastic_missing(
+    es: Elasticsearch,
     meeting_id: int,
-    date: str,
-    title: str,
+    date: tuple,
+    title: tuple,
     missing_DIELINKE: list,
     missing_CDUCSU: list,
     missing_FDP: list,
     missing_SPD: list,
     missing_GRUENE: list,
     missing_FRAKTIONSLOS: list,
-    missing_AFD: list
+    missing_AFD: list,
 ):
     """
     Fills the elastic index with the data from the document
@@ -442,11 +440,18 @@ def fill_elastic_missing(
     }
 
     idDokumentennummer = re.sub("/", "", meeting_id)
-    print("idDokumentennummer: " + idDokumentennummer)
-    resp = es.index(index=missing_index, body=doc)
+    counter, last_counter = counter_function(idDokumentennummer)
+    if counter == 0:
+        print(
+            f"Indexing {idDokumentennummer} - complete with {last_counter} entries",
+            end="\n",
+        )
+    else:
+        print(f"Indexing {idDokumentennummer} - {counter}", end="\r")
+    es.index(index=missing_index, document=doc)
 
 
-def fill_loop(dictionary: dict):
+def fill_loop(es: Elasticsearch, dictionary: dict):
     """
     Fills the elastic index with the data from the document
     """
@@ -470,6 +475,7 @@ def fill_loop(dictionary: dict):
         ) = get_missing_mps(document["text"])
 
         fill_elastic_missing(
+            es,
             meeting_id,
             date,
             title,
@@ -482,8 +488,6 @@ def fill_loop(dictionary: dict):
             missing_AFD,
         )
 
-        # TODO: There is always only one none empty element in the list. Correct?
-        # No there should be all speeches from the current doc in them
         (
             Reden_AfD,
             Reden_CDU,
@@ -497,51 +501,51 @@ def fill_loop(dictionary: dict):
         for element in Reden_AfD:
             name_speaker = element.split()[:2]
             party = "AfD"
-            get_remarks(meeting_id, date, element, name_speaker, party)
+            get_remarks(es, meeting_id, date, element, name_speaker, party)
             fill_elastic(
-                element, name_speaker, meeting_id, party, date, title, publisher
+                es, element, name_speaker, meeting_id, party, date, title, publisher
             )
 
         for element in Reden_CDU:
             name_speaker = element.split()[:2]
             party = "CDU"
             fill_elastic(
-                element, name_speaker, meeting_id, party, date, title, publisher
+                es, element, name_speaker, meeting_id, party, date, title, publisher
             )
 
         for element in Reden_FDP:
             name_speaker = element.split()[:2]
             party = "FDP"
             fill_elastic(
-                element, name_speaker, meeting_id, party, date, title, publisher
+                es, element, name_speaker, meeting_id, party, date, title, publisher
             )
 
         for element in Reden_Fraktionslos:
             name_speaker = element.split()[:2]
             party = "Fraktionslos"
             fill_elastic(
-                element, name_speaker, meeting_id, party, date, title, publisher
+                es, element, name_speaker, meeting_id, party, date, title, publisher
             )
 
         for element in Reden_Gruene:
             name_speaker = element.split()[:2]
             party = "Bündnis 90/Die Grünen"
             fill_elastic(
-                element, name_speaker, meeting_id, party, date, title, publisher
+                es, element, name_speaker, meeting_id, party, date, title, publisher
             )
 
         for element in Reden_Linke:
             name_speaker = element.split()[:2]
             party = "Die Linke"
             fill_elastic(
-                element, name_speaker, meeting_id, party, date, title, publisher
+                es, element, name_speaker, meeting_id, party, date, title, publisher
             )
 
         for element in Reden_SPD:
             name_speaker = element.split()[:2]
             party = "SPD"
             fill_elastic(
-                element, name_speaker, meeting_id, party, date, title, publisher
+                es, element, name_speaker, meeting_id, party, date, title, publisher
             )
 
     es.indices.refresh(index=index_protokolle)
@@ -552,27 +556,58 @@ def fill_loop(dictionary: dict):
     print("Anzahl Protokolle", geladeneProtkolle)
 
 
-# delete_elastic_index() # ggf. vorhandener Index löschen
-response = requests.get(api_url)
+def establish_elastic_connection():
+    """
+    Establishes a connection to the elastic search instance
 
-dictionary = response.json()
+    Returns: Elasticsearch object
+    """
+    # define elasticsearch connection
+    try:
+        es = Elasticsearch(
+            "http://localhost:9200",
+            verify_certs=False,
+            request_timeout=60,
+            retry_on_timeout=True,
+            max_retries=5,
+        )  # Security not enabled
+        return es
+    except Exception as e:
+        AssertionError(
+            f"Elasticsearch connection failed. Please check your connection and that Host and Port in the config file are correct. Error: {e}"
+        )
+        return None
 
 
-vorhandeneDokumente = dictionary["numFound"]
-print("Gesamtanzahl vorhandener Dokumente: ", vorhandeneDokumente)
+if __name__ == "__main__":
 
-fill_loop(dictionary)
+    es = establish_elastic_connection()
+    if es is None:
+        raise AssertionError("Elasticsearch connection failed.")
 
-oldCursor = ""
-cursor = dictionary["cursor"]
+    # define api url to get all plenary protocols
+    api_url = "https://search.dip.bundestag.de/api/v1/plenarprotokoll-text?f.datum.start=2021-09-26&apikey=ECrwIai.ErBmVaihLIzqiqu9DqNoVFVvUysTzDwuOo"
 
-while len(cursor) > 0 and cursor != oldCursor:  # wenn neu = alt dann ende
-    cursor = re.sub("\/", "%2F", cursor)
-    cursor = re.sub("\+", "%2B", cursor)
-    weiterlesen_url = api_url + "&cursor=" + cursor
-    response = requests.get(weiterlesen_url)
+    # delete_elastic_index() # ggf. vorhandener Index löschen
+    response = requests.get(api_url)
+
     dictionary = response.json()
-    fill_loop(dictionary)
 
-    oldCursor = cursor
+    vorhandeneDokumente = dictionary["numFound"]
+    print("Gesamtanzahl vorhandener Dokumente: ", vorhandeneDokumente)
+
+    fill_loop(es, dictionary)
+
+    oldCursor = ""
     cursor = dictionary["cursor"]
+
+    while len(cursor) > 0 and cursor != oldCursor:  # wenn neu = alt dann ende
+        cursor = re.sub("\/", "%2F", cursor)
+        cursor = re.sub("\+", "%2B", cursor)
+        weiterlesen_url = api_url + "&cursor=" + cursor
+        response = requests.get(weiterlesen_url)
+        dictionary = response.json()
+        fill_loop(es, dictionary)
+
+        oldCursor = cursor
+        cursor = dictionary["cursor"]

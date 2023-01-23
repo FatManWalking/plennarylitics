@@ -3,9 +3,8 @@ volumes:
     driver: local
 
 services:
-
   ### Images
-  db:
+  elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
     container_name: elasticsearch
     environment:
@@ -32,6 +31,7 @@ services:
   ### Non-image services
 
   backend:
+    container_name: FastAPI
     build:
       context: .
       dockerfile: ./backend/Dockerfile
@@ -42,7 +42,7 @@ services:
     volumes:
       - ./backend/app:/code/app
     depends_on:
-      - db
+      - kibana
     networks:
       - es-net
 

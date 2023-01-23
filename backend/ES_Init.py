@@ -329,7 +329,7 @@ def counter_function(idDokumentennummer: str):
         counter += 1
     else:
         last_counter = counter
-        counter = 0
+        counter = 1
     last_idDokumentennummer = idDokumentennummer
     return counter, last_counter
 
@@ -359,7 +359,7 @@ def fill_elastic(
 
     idDokumentennummer = re.sub("/", "", meeting_id)
     counter, last_counter = counter_function(idDokumentennummer)
-    if counter == 0:
+    if counter == 1:
         print(
             f"Indexing {idDokumentennummer} - complete with {last_counter} entries",
             end="\n",
@@ -400,7 +400,7 @@ def fill_elastic_remarks(
 
     idDokumentennummer = re.sub("/", "", meeting_id)
     counter, last_counter = counter_function(idDokumentennummer)
-    if counter == 0:
+    if counter == 1:
         print(
             f"Indexing {idDokumentennummer} - complete with {last_counter} entries",
             end="\n",
@@ -441,7 +441,7 @@ def fill_elastic_missing(
 
     idDokumentennummer = re.sub("/", "", meeting_id)
     counter, last_counter = counter_function(idDokumentennummer)
-    if counter == 0:
+    if counter == 1:
         print(
             f"Indexing {idDokumentennummer} - complete with {last_counter} entries",
             end="\n",

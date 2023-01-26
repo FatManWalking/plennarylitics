@@ -54,7 +54,7 @@ services:
     depends_on:
       - backend
     restart: "no"
-    entrypoint: /bin/bash -c "sleep 30 && python /code/ES_Init.py"
+    entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"
     networks:
       - es-net
 

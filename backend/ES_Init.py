@@ -5,9 +5,9 @@ import re
 from typing import List, Dict, Tuple, Any, Generator
 
 # define index names
-index_protokolle = "bjoerns_test_protokolle"
-missing_index = "bjoerns_test_missing"
-index_remarks = "bjoerns_test_remarks"
+index_protokolle = "klemens3_protokolle"
+missing_index = "klemens3_missing"
+index_remarks = "klemens3_remarks"
 
 counter = 0
 last_counter = 0
@@ -93,6 +93,9 @@ def get_missing_mps(document: str) -> tuple:
                     #     e,"Index out of bounds for switchnames. Unordered name is used instead",
                     # )
                     name = element[0]
+                
+                if name == "":
+                    break
 
                 party_dict[party].append(name)
 
@@ -151,7 +154,7 @@ def get_remarks(
     date: tuple,
     text: str,
     name_speaker: str,
-    party: str,
+    party_speaker: str,
 ) -> None:
     """
     Fills the remarks index with remarks made by MPs
@@ -248,7 +251,7 @@ def get_remarks(
             date,
             element,
             name_speaker,
-            party,
+            party_speaker,
             remark_class,
             remarking_parties,
             remarking_person,
@@ -427,6 +430,10 @@ def fill_elastic_missing(
     """
     Fills the elastic index with the data from the document
     """
+    if len(missing_DIELINKE) == 0 and len(missing_CDUCSU)== 0 and len(missing_FDP)== 0 and len(missing_SPD)== 0 and len(missing_GRUENE)== 0 and len(missing_FRAKTIONSLOS)== 0 and len(missing_AFD)== 0:
+        print("No missings found")
+        return
+   
     doc = {
         "Dokumentnummer": meeting_id,
         "missing_DIELINKE": missing_DIELINKE,
@@ -467,11 +474,11 @@ def fill_loop(es: Elasticsearch, dictionary: dict):
         (
             missing_DIELINKE,
             missing_CDUCSU,
-            missing_FDP,
             missing_SPD,
-            missing_GRUENE,
-            missing_FRAKTIONSLOS,
             missing_AFD,
+            missing_FRAKTIONSLOS,
+            missing_GRUENE,
+            missing_FDP,
             missing_mp_stats,
         ) = get_missing_mps(document["text"])
 

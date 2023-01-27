@@ -5,9 +5,9 @@ import re
 from typing import List, Dict, Tuple, Any, Generator
 
 # define index names
-index_protokolle = "klemens3_protokolle"
-missing_index = "klemens3_missing"
-index_remarks = "klemens3_remarks"
+index_protokolle = "klemens11_protokolle"
+missing_index = "klemens11_missing"
+index_remarks = "klemens11_remarks"
 
 counter = 0
 last_counter = 0
@@ -47,23 +47,26 @@ def get_missing_mps(document: str) -> tuple:
 
     # This split is done to seperate the Anlagen from the rest of the text, it is the only consistently working string we know of
     document = document.replace(" .", ".")
-    split = document.split("Stenografischen Bericht")
+    #split = document.split("Stenografischen Bericht")
 
     # This split is done to cut the rest of the file from the missing MPs part of the anlagen.
     # If there is no Anlage 2, we have found that splitting on "satzweiss.com" yields good results too
-    try:
-        split = split[1].split("Anlage 2")
+    #try:
+    split = document.split("Entschuldigte ")
 
-        missing_mps = split[0].split("Satzweiss.com")
+    try: 
+        missing_mps = split[2].split("Anlage 2")
+        missing_mps = missing_mps[0]
     except:
-
         try:
-            missing_mps = split[1].split("Satzweiss.com")
+            missing_mps = split[2]
+            
         except:
-            missing_mps = split[0]
+            missing_mps = ""
+
 
     # split into seperate rows to get MP names
-    missing = re.split("\d+\.\d+\.\d+", missing_mps[0])
+    missing = re.split("\d+\.\d+\.\d+", missing_mps)
 
     missing_mps = missing[0].splitlines()
     # print(missing_mps)
@@ -147,7 +150,6 @@ def get_party(element: str) -> list:
 
     return remarking_party
 
-
 def get_remarks(
     es: Elasticsearch,
     meeting_id: int,
@@ -176,6 +178,8 @@ def get_remarks(
     for element in remarks:
         remark_class = []
         remarking_parties = []
+        remarking_person =""
+        
 
         for type in ["Beifall", "Lachen", "Heiterkeit", "Zuruf"]:
             if type in element:
@@ -188,9 +192,10 @@ def get_remarks(
             "[AfD]:",
             "[FDP]:",
             "[DIELINKE]:",
-            "[FRAKTIONSLOS]:",
+            "[FRAKTIONSLOS]:"
         ]:
             if party in element:
+                
                 party_remarking_person = party[1:-2]
                 list = element.split()
                 index = list.index(party)
@@ -204,43 +209,42 @@ def get_remarks(
                 cleaned_list = element.split(party)
                 cleaned_text = cleaned_list.pop()
 
-                break
 
-        if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
-            remark_class.append("Thematischer Zwischenruf")
+            if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
+                remark_class.append("Thematischer Zwischenruf")
 
-            party_remarking_person = "Bündnis 90/Die Grünen"
+                party_remarking_person = "Bündnis 90/Die Grünen"
 
-            remarking_parties = []
-            list = element.split()
-            # print(list)
+                remarking_parties = []
+                list = element.split()
+                # print(list)
 
-            index = list.index("[BÜNDNIS")
-            try:
-                remarking_person = str(list[index - 2] + " " + list[index - 1])
-            except:
-                remarking_person = "None"
+                index = list.index("[BÜNDNIS")
+                try:
+                    remarking_person = str(list[index - 2] + " " + list[index - 1])
+                except:
+                    remarking_person = "None"
 
-            cleaned_list = element.split("[BÜNDNIS 90/DIE GRÜNEN]:")
-            cleaned_text = cleaned_list.pop()
+                cleaned_list = element.split("[BÜNDNIS 90/DIE GRÜNEN]:")
+                cleaned_text = cleaned_list.pop()
 
-        if "[DIE LINKE]:" in element:
-            remark_class.append("Thematischer Zwischenruf")
-            element = element.replace("[DIE LINKE]:", "[DIELINKE]:")
-            party_remarking_person = "Die Linke"
+            if "[DIE LINKE]:" in element:
+                remark_class.append("Thematischer Zwischenruf")
+                element = element.replace("[DIE LINKE]:", "[DIELINKE]:")
+                party_remarking_person = "Die Linke"
 
-            list = element.split()
+                list = element.split()
 
-            try:
-                index = list.index("[DIELINKE]:")
-                remarking_person = str(list[index - 2] + " " + list[index - 1])
-            except:
-                remarking_person = "None"
+                try:
+                    index = list.index("[DIELINKE]:")
+                    remarking_person = str(list[index - 2] + " " + list[index - 1])
+                except:
+                    remarking_person = "None"
 
-            cleaned_list = element.split("[DIELINKE]:")
-            cleaned_text = cleaned_list.pop()
+                cleaned_list = element.split("[DIELINKE]:")
+                cleaned_text = cleaned_list.pop()
 
-        else:
+        if remarking_person == "":
             remarking_person = "None"
             party_remarking_person = "None"
             cleaned_text = element
@@ -406,7 +410,7 @@ def fill_elastic_remarks(
     counter, last_counter = counter_function(idDokumentennummer)
     if counter == 1:
         print(
-            f"Indexing {idDokumentennummer} - complete with {last_counter} entries",
+            f"Indexing {idDokumentennummer} - complete with {last_counter} Remarks",
             end="\n",
         )
     else:
@@ -431,7 +435,6 @@ def fill_elastic_missing(
     Fills the elastic index with the data from the document
     """
     if len(missing_DIELINKE) == 0 and len(missing_CDUCSU)== 0 and len(missing_FDP)== 0 and len(missing_SPD)== 0 and len(missing_GRUENE)== 0 and len(missing_FRAKTIONSLOS)== 0 and len(missing_AFD)== 0:
-        print("No missings found")
         return
    
     doc = {
@@ -451,7 +454,7 @@ def fill_elastic_missing(
     counter, last_counter = counter_function(idDokumentennummer)
     if counter == 1:
         print(
-            f"Indexing {idDokumentennummer} - complete with {last_counter} entries",
+            f"Indexing {idDokumentennummer} - complete with {last_counter} Entries about Missing",
             end="\n",
         )
     else:
@@ -497,12 +500,12 @@ def fill_loop(es: Elasticsearch, dictionary: dict):
         )
 
         (
+            Reden_Linke,
             Reden_AfD,
+            Reden_Gruene,
             Reden_CDU,
             Reden_FDP,
             Reden_Fraktionslos,
-            Reden_Gruene,
-            Reden_Linke,
             Reden_SPD,
         ) = Preprocessing(str(document["text"]))
 
@@ -517,6 +520,7 @@ def fill_loop(es: Elasticsearch, dictionary: dict):
         for element in Reden_CDU:
             name_speaker = element.split()[:2]
             party = "CDU"
+            get_remarks(es, meeting_id, date, element, name_speaker, party)
             fill_elastic(
                 es, element, name_speaker, meeting_id, party, date, title, publisher
             )
@@ -524,6 +528,7 @@ def fill_loop(es: Elasticsearch, dictionary: dict):
         for element in Reden_FDP:
             name_speaker = element.split()[:2]
             party = "FDP"
+            get_remarks(es, meeting_id, date, element, name_speaker, party)
             fill_elastic(
                 es, element, name_speaker, meeting_id, party, date, title, publisher
             )
@@ -531,6 +536,7 @@ def fill_loop(es: Elasticsearch, dictionary: dict):
         for element in Reden_Fraktionslos:
             name_speaker = element.split()[:2]
             party = "Fraktionslos"
+            get_remarks(es, meeting_id, date, element, name_speaker, party)
             fill_elastic(
                 es, element, name_speaker, meeting_id, party, date, title, publisher
             )
@@ -538,6 +544,7 @@ def fill_loop(es: Elasticsearch, dictionary: dict):
         for element in Reden_Gruene:
             name_speaker = element.split()[:2]
             party = "Bündnis 90/Die Grünen"
+            get_remarks(es, meeting_id, date, element, name_speaker, party)
             fill_elastic(
                 es, element, name_speaker, meeting_id, party, date, title, publisher
             )
@@ -545,6 +552,7 @@ def fill_loop(es: Elasticsearch, dictionary: dict):
         for element in Reden_Linke:
             name_speaker = element.split()[:2]
             party = "Die Linke"
+            get_remarks(es, meeting_id, date, element, name_speaker, party)
             fill_elastic(
                 es, element, name_speaker, meeting_id, party, date, title, publisher
             )
@@ -552,6 +560,7 @@ def fill_loop(es: Elasticsearch, dictionary: dict):
         for element in Reden_SPD:
             name_speaker = element.split()[:2]
             party = "SPD"
+            get_remarks(es, meeting_id, date, element, name_speaker, party)
             fill_elastic(
                 es, element, name_speaker, meeting_id, party, date, title, publisher
             )

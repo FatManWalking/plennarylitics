@@ -5,9 +5,9 @@ import re
 from typing import List, Dict, Tuple, Any, Generator
 
 # define index names
-index_protokolle = "klemens11_protokolle"
-missing_index = "klemens11_missing"
-index_remarks = "klemens11_remarks"
+index_protokolle = "ichtestegerne_docs6"
+missing_index = "ichtestegerne_missing6"
+index_remarks = "ichtestegerne_remarks6"
 
 counter = 0
 last_counter = 0
@@ -178,7 +178,8 @@ def get_remarks(
     for element in remarks:
         remark_class = []
         remarking_parties = []
-        remarking_person =""
+        remarking_persons =[]
+        party_remarking_person = []
         
 
         for type in ["Beifall", "Lachen", "Heiterkeit", "Zuruf"]:
@@ -196,55 +197,67 @@ def get_remarks(
         ]:
             if party in element:
                 
-                party_remarking_person = party[1:-2]
+                party_remarking_person.append(party[1:-2])
                 list = element.split()
                 index = list.index(party)
+                remark_class.append("Thematischer Zwischenruf")
                 try:
-                    remarking_person = str(list[index - 2] + " " + list[index - 1])
+                    pers = str(list[index - 2] + " " + list[index - 1])
+                    if "von" in pers :
+                        remarking_persons.append(str(list[index - 3] + " "+ list[index - 2] + " " + list[index - 1]))
+                    else:
+                        remarking_persons.append(pers)
 
                 except ValueError as e:
                     # print(e, "No remarkign Person found")
-                    remarking_person = "None"
+                    remarking_persons = "None"
 
                 cleaned_list = element.split(party)
                 cleaned_text = cleaned_list.pop()
 
 
-            if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
-                remark_class.append("Thematischer Zwischenruf")
+        if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
+            remark_class.append("Thematischer Zwischenruf")
 
-                party_remarking_person = "Bündnis 90/Die Grünen"
+            party_remarking_person.append("Bündnis 90/Die Grünen")
 
-                remarking_parties = []
-                list = element.split()
-                # print(list)
+            remarking_parties = []
+            list = element.split()
+            # print(list)
 
-                index = list.index("[BÜNDNIS")
-                try:
-                    remarking_person = str(list[index - 2] + " " + list[index - 1])
-                except:
-                    remarking_person = "None"
+            index = list.index("[BÜNDNIS")
+            try:
+                pers = str(list[index - 2] + " " + list[index - 1])
+                if "von" in pers :
+                    remarking_persons.append(str(list[index - 3] + " "+ list[index - 2] + " " + list[index - 1]))
+                else:
+                    remarking_persons.append(pers)
+            except:
+                remarking_persons = "None"
 
-                cleaned_list = element.split("[BÜNDNIS 90/DIE GRÜNEN]:")
-                cleaned_text = cleaned_list.pop()
+            cleaned_list = element.split("[BÜNDNIS 90/DIE GRÜNEN]:")
+            cleaned_text = cleaned_list.pop()
 
-            if "[DIE LINKE]:" in element:
-                remark_class.append("Thematischer Zwischenruf")
-                element = element.replace("[DIE LINKE]:", "[DIELINKE]:")
-                party_remarking_person = "Die Linke"
+        if "[DIE LINKE]:" in element:
+            remark_class.append("Thematischer Zwischenruf")
+            element = element.replace("[DIE LINKE]:", "[DIELINKE]:")
+            party_remarking_person.append("Die Linke")
 
-                list = element.split()
+            list = element.split()
+            index = list.index("[DIELINKE]:")
+            try:
+                pers = str(list[index - 2] + " " + list[index - 1])
+                if "von" in pers :
+                    remarking_persons.append(str(list[index - 3] + " "+ list[index - 2] + " " + list[index - 1]))
+                else:
+                    remarking_persons.append(pers)
+            except:
+                remarking_persons = "None"
 
-                try:
-                    index = list.index("[DIELINKE]:")
-                    remarking_person = str(list[index - 2] + " " + list[index - 1])
-                except:
-                    remarking_person = "None"
+            cleaned_list = element.split("[DIELINKE]:")
+            cleaned_text = cleaned_list.pop()
 
-                cleaned_list = element.split("[DIELINKE]:")
-                cleaned_text = cleaned_list.pop()
-
-        if remarking_person == "":
+        if remarking_persons == []:
             remarking_person = "None"
             party_remarking_person = "None"
             cleaned_text = element
@@ -258,7 +271,7 @@ def get_remarks(
             party_speaker,
             remark_class,
             remarking_parties,
-            remarking_person,
+            remarking_persons,
             party_remarking_person,
             cleaned_text,
         )
@@ -276,6 +289,8 @@ def Preprocessing(document: Any) -> Generator[list, None, None]:
     meeting_content = " ".join(line.strip() for line in meeting_content.splitlines())
     meeting_content = meeting_content.replace("- ", "")
     meeting_content = re.sub("\n", " ", meeting_content)
+
+    
 
     party_split = re.split(
         "(\(DIE LINKE\):|\(AfD\):|\(BÜNDNIS 90/DIE GRÜNEN\):|\(CDU/CSU\):|\(FDP\):|\(FRAKTIONSLOS\):|\(SPD\):)",
@@ -311,9 +326,11 @@ def Preprocessing(document: Any) -> Generator[list, None, None]:
                 )
                 party_dict[party][-1] = moderation_split[0]
                 break
-
+    
     # TODO: There is always only one none empty element in the list. Correct?
     # No there are the speeches per party in the dictionary
+    for element in party_dict.values():
+        element = re.sub('Deutscher Bundestag[^>]+\(A\) \(B\) \(C\) \(D\)', '', str(element))
     return (speech for speech in party_dict.values())
 
 

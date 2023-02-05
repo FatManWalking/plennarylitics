@@ -1,23 +1,23 @@
-FROM node:17 as builder
+FROM node:17-slim as builder
 
 WORKDIR /app
 
-RUN npm install --location=global pnpm
+COPY package.json ./
+RUN rm -rf node_modules
+RUN rm -rf build
 
-# install dependencies
-COPY pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY ./frontend/package.json .
-RUN pnpm install --filter frontend
+COPY . .
 
-# build application
-ADD ./frontend frontend
-RUN pnpm run --dir frontend build
+RUN npm install
+RUN npm run build
 
-FROM node:17-alpine
+FROM node:17-slim as runner
 
 WORKDIR /app
-COPY --from=builder /app/frontend .
-COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/package.json ./package.json
+
+RUN npm install --production
 
 EXPOSE 3000
-CMD ["node", "build"]
+ENTRYPOINT ["npm", "run", "start"]

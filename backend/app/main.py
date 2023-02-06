@@ -39,6 +39,78 @@ def search(index_name: str):
 
     return res
 
+@app.get("/get_missing/{mp_name}")
+def search(mp_name: str):
+    """
+    :param index_name: name of the index to be queried
+    #TODO: add query as a parameter
+    :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"match_all": {}} or {"match": {"title": "test"}}
+    :return: response from Elasticsearch
+    """
+
+
+    es = get_es_client()
+    if es is not None:
+        search_object =  {"query" : {
+                                    "multi_match" : {
+                                    "query":    mp_name, 
+                                    "type":       "phrase_prefix",
+                                    "fields": [ "missing_AFD", "missing_CDUCSU", "missing_DIELINKE", "missing_FDP", "missing_SPD", "missing_GRUENE", "missing_FRAKTIONSLOS" ] 
+    }},
+                                    "highlight": {
+                                        "fields": {
+                                            "missing_AFD": {},
+                                            "missing_CDUCSU": {},
+                                            "missing_DIELINKE" : {},
+                                            "missing_FDP" : {},
+                                            "missing_SPD" : {},
+                                            "missing_GRUENE" : {},
+                                            "missing_FRAKTIONSLOS" : {}
+                                        }
+                                    },
+                                    "size": 10000      
+        }
+
+        res = es.search(index="bjoerns_test_missing", body =search_object)
+    else:
+        print("Elasticsearch is not available")
+        return {}
+
+    # Number of hits we got back
+    print(f"res: {res['hits']['total']['value']}")
+
+    return res
+
+@app.get("/get_remarks/{mp_name}")
+def search(mp_name: str):
+    """
+    :param index_name: name of the index to be queried
+    #TODO: add query as a parameter
+    :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"match_all": {}} or {"match": {"title": "test"}}
+    :return: response from Elasticsearch
+    """
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        search_object =  {"query" : {
+                                    "match": {
+                                    "missing_AFD": mp_name
+                                    }},
+                                    "fields": ["missing_AFD"]              
+        }
+                                
+        
+
+        res = es.search(index="bjoerns_test_remarks", body =search_object)
+    else:
+        print("Elasticsearch is not available")
+        return {}
+
+    # Number of hits we got back
+    print(f"res: {res['hits']['total']['value']}")
+
+    return res
 
 def get_es_client():
     return Elasticsearch(

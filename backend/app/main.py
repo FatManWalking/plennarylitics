@@ -81,7 +81,7 @@ def search(mp_name: str):
 
     return res
 
-@app.get("/get_remarks/{mp_name}")
+@app.get("/get_remarks_by_mp/{mp_name}")
 def search(mp_name: str):
     """
     :param index_name: name of the index to be queried
@@ -94,10 +94,13 @@ def search(mp_name: str):
     es = get_es_client()
     if es is not None:
         search_object =  {"query" : {
-                                    "match": {
-                                    "missing_AFD": mp_name
-                                    }},
-                                    "fields": ["missing_AFD"]              
+                                    "multi_match" : {
+                                    "query":    mp_name, 
+                                    "type":       "phrase_prefix",
+                                    "fields": ["Remarking Persons"] 
+    }},
+                        
+                                    "size": 10000      
         }
                                 
         

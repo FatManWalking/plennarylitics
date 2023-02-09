@@ -3,9 +3,8 @@ volumes:
     driver: local
 
 services:
-
   ### Images
-  db:
+  elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
     container_name: elasticsearch
     environment:
@@ -13,6 +12,7 @@ services:
       - xpack.security.enabled=false
     ports:
       - "9200:9200"
+    mem_limit: 1000m
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
     networks:
@@ -23,6 +23,7 @@ services:
     container_name: kibana
     ports:
       - "5601:5601"
+    mem_limit: 1000m
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
@@ -32,17 +33,31 @@ services:
   ### Non-image services
 
   backend:
+    container_name: FastAPI
     build:
       context: .
       dockerfile: ./backend/Dockerfile
     ports:
       - "8080:8080"
+    mem_limit: 1000m
     environment:
       DEBUG: 1
     volumes:
       - ./backend/app:/code/app
     depends_on:
-      - db
+      - kibana
+    networks:
+      - es-net
+
+  backend-setup:
+    container_name: backend-setup
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    depends_on:
+      - backend
+    restart: "no"
+    entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"
     networks:
       - es-net
 

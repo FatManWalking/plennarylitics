@@ -1,18 +1,76 @@
-services:
-    frontend:
-        build:
-            context: .
-            dockerfile: ./frontend/Dockerfile
-        environment:
-            - Backend_URL=http://backend:8080
-        ports:
-            - "3000:3000"
-        depends_on:
-            - backend
+volumes:
+  elasticdata:
+    driver: local
 
-    backend:
-        build:
-            context: .
-            dockerfile: ./backend/Dockerfile
-        ports:
-            - "8080:8080"
+services:
+  ### Images
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
+    container_name: elasticsearch
+    environment:
+      - "discovery.type=single-node"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    mem_limit: 1000m
+    volumes:
+      - elasticdata:/usr/share/elasticsearch/data
+    networks:
+      - es-net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.8
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    mem_limit: 1000m
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - es-net
+  ### Non-image services
+
+  backend:
+    container_name: FastAPI
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    ports:
+      - "8080:8080"
+    mem_limit: 1000m
+    environment:
+      DEBUG: 1
+    volumes:
+      - ./backend/app:/code/app
+    depends_on:
+      - kibana
+    networks:
+      - es-net
+
+  backend-setup:
+    container_name: backend-setup
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    depends_on:
+      - backend
+    restart: "no"
+    entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"
+    networks:
+      - es-net
+
+networks:
+  es-net:
+    driver: bridge
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: ./frontend/Dockerfile
+  #   environment:
+  #     - Backend_URL=http://backend:8080
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend

@@ -12,6 +12,7 @@ services:
       - xpack.security.enabled=false
     ports:
       - "9200:9200"
+    mem_limit: 1000m
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
     networks:
@@ -22,6 +23,7 @@ services:
     container_name: kibana
     ports:
       - "5601:5601"
+    mem_limit: 1000m
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
@@ -37,6 +39,7 @@ services:
       dockerfile: ./backend/Dockerfile
     ports:
       - "8080:8080"
+    mem_limit: 1000m
     environment:
       DEBUG: 1
     volumes:
@@ -54,7 +57,7 @@ services:
     depends_on:
       - backend
     restart: "no"
-    entrypoint: /bin/bash -c "sleep 30 && python /code/ES_Init.py"
+    entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"
     networks:
       - es-net
 

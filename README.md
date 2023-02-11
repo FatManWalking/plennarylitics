@@ -84,4 +84,16 @@ Up to this point, we are including 50 files from the current legislative period 
 * Holiday
 
 ## Week 1
+* Working on Report
+* Getting connection of the "reaction component" with Elasticsearch setup
+* Getting API and Backend setup
+* Testing API and Backend
+* Getting Pancake setup
+
+## Week 2
+* Working on Report
+* Finalise Dockerization of the components
+* Conception of Frontend Data Visualisations
+* Code Cleanup
+* Conception of interesting insights with the Data we currently have
 

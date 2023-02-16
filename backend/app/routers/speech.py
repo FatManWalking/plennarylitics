@@ -52,6 +52,13 @@ async def get_speeches_topic(
 
     :return: response from Elasticsearch
     """
+    search_result = es.count(index="f3_test_protokolle",
+                          query={"match": {
+                              "Text": {
+                                  "query": topic
+                              }
+                          }
+                          })
     pass
 
 

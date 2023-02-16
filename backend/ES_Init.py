@@ -47,23 +47,21 @@ def get_missing_mps(document: str) -> tuple:
 
     # This split is done to seperate the Anlagen from the rest of the text, it is the only consistently working string we know of
     document = document.replace(" .", ".")
-    #split = document.split("Stenografischen Bericht")
+    # split = document.split("Stenografischen Bericht")
 
     # This split is done to cut the rest of the file from the missing MPs part of the anlagen.
-    # If there is no Anlage 2, we have found that splitting on "satzweiss.com" yields good results too
-    #try:
+    # try:
     split = document.split("Entschuldigte ")
 
-    try: 
+    try:
         missing_mps = split[2].split("Anlage 2")
         missing_mps = missing_mps[0]
     except:
         try:
             missing_mps = split[2]
-            
+
         except:
             missing_mps = ""
-
 
     # split into seperate rows to get MP names
     missing = re.split("\d+\.\d+\.\d+", missing_mps)
@@ -96,7 +94,7 @@ def get_missing_mps(document: str) -> tuple:
                     #     e,"Index out of bounds for switchnames. Unordered name is used instead",
                     # )
                     name = element[0]
-                
+
                 if name == "":
                     break
 
@@ -150,6 +148,7 @@ def get_party(element: str) -> list:
 
     return remarking_party
 
+
 def get_remarks(
     es: Elasticsearch,
     meeting_id: int,
@@ -178,9 +177,8 @@ def get_remarks(
     for element in remarks:
         remark_class = []
         remarking_parties = []
-        remarking_persons =[]
+        remarking_persons = []
         party_remarking_person = []
-        
 
         for type in ["Beifall", "Lachen", "Heiterkeit", "Zuruf"]:
             if type in element:
@@ -193,18 +191,29 @@ def get_remarks(
             "[AfD]:",
             "[FDP]:",
             "[DIELINKE]:",
-            "[FRAKTIONSLOS]:"
+            "[FRAKTIONSLOS]:",
         ]:
             if party in element:
-                
+
                 party_remarking_person.append(party[1:-2])
                 list = element.split()
-                index = list.index(party)
+                try:
+                    index = list.index(party)
+                except ValueError as e:
+                    print(e, list, party)
                 remark_class.append("Thematischer Zwischenruf")
                 try:
                     pers = str(list[index - 2] + " " + list[index - 1])
-                    if "von" in pers :
-                        remarking_persons.append(str(list[index - 3] + " "+ list[index - 2] + " " + list[index - 1]))
+                    if "von" in pers:
+                        remarking_persons.append(
+                            str(
+                                list[index - 3]
+                                + " "
+                                + list[index - 2]
+                                + " "
+                                + list[index - 1]
+                            )
+                        )
                     else:
                         remarking_persons.append(pers)
 
@@ -214,7 +223,6 @@ def get_remarks(
 
                 cleaned_list = element.split(party)
                 cleaned_text = cleaned_list.pop()
-
 
         if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
             remark_class.append("Thematischer Zwischenruf")
@@ -228,8 +236,16 @@ def get_remarks(
             index = list.index("[BÜNDNIS")
             try:
                 pers = str(list[index - 2] + " " + list[index - 1])
-                if "von" in pers :
-                    remarking_persons.append(str(list[index - 3] + " "+ list[index - 2] + " " + list[index - 1]))
+                if "von" in pers:
+                    remarking_persons.append(
+                        str(
+                            list[index - 3]
+                            + " "
+                            + list[index - 2]
+                            + " "
+                            + list[index - 1]
+                        )
+                    )
                 else:
                     remarking_persons.append(pers)
             except:
@@ -247,8 +263,16 @@ def get_remarks(
             index = list.index("[DIELINKE]:")
             try:
                 pers = str(list[index - 2] + " " + list[index - 1])
-                if "von" in pers :
-                    remarking_persons.append(str(list[index - 3] + " "+ list[index - 2] + " " + list[index - 1]))
+                if "von" in pers:
+                    remarking_persons.append(
+                        str(
+                            list[index - 3]
+                            + " "
+                            + list[index - 2]
+                            + " "
+                            + list[index - 1]
+                        )
+                    )
                 else:
                     remarking_persons.append(pers)
             except:
@@ -290,8 +314,6 @@ def Preprocessing(document: Any) -> Generator[list, None, None]:
     meeting_content = meeting_content.replace("- ", "")
     meeting_content = re.sub("\n", " ", meeting_content)
 
-    
-
     party_split = re.split(
         "(\(DIE LINKE\):|\(AfD\):|\(BÜNDNIS 90/DIE GRÜNEN\):|\(CDU/CSU\):|\(FDP\):|\(FRAKTIONSLOS\):|\(SPD\):)",
         meeting_content,
@@ -326,11 +348,13 @@ def Preprocessing(document: Any) -> Generator[list, None, None]:
                 )
                 party_dict[party][-1] = moderation_split[0]
                 break
-    
+
     # TODO: There is always only one none empty element in the list. Correct?
     # No there are the speeches per party in the dictionary
     for element in party_dict.values():
-        element = re.sub('Deutscher Bundestag[^>]+\(A\) \(B\) \(C\) \(D\)', '', str(element))
+        element = re.sub(
+            "Deutscher Bundestag[^>]+\(A\) \(B\) \(C\) \(D\)", "", str(element)
+        )
     return (speech for speech in party_dict.values())
 
 
@@ -451,9 +475,17 @@ def fill_elastic_missing(
     """
     Fills the elastic index with the data from the document
     """
-    if len(missing_DIELINKE) == 0 and len(missing_CDUCSU)== 0 and len(missing_FDP)== 0 and len(missing_SPD)== 0 and len(missing_GRUENE)== 0 and len(missing_FRAKTIONSLOS)== 0 and len(missing_AFD)== 0:
+    if (
+        len(missing_DIELINKE) == 0
+        and len(missing_CDUCSU) == 0
+        and len(missing_FDP) == 0
+        and len(missing_SPD) == 0
+        and len(missing_GRUENE) == 0
+        and len(missing_FRAKTIONSLOS) == 0
+        and len(missing_AFD) == 0
+    ):
         return
-   
+
     doc = {
         "Dokumentnummer": meeting_id,
         "missing_DIELINKE": missing_DIELINKE,

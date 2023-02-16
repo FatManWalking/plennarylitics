@@ -1,13 +1,16 @@
-# Router to get all missing MPs or aggregated by party (with optional date range or other filters)
+# Router to get all speeches from a specific MP or party (with optional date range or other filters)
 #
 from typing import Union
+
 from fastapi import APIRouter
 
 router = APIRouter()
 
-
-@router.get("/get_missing", tags=["missing"])
-async def get_missing(
+# TODO: add more filters
+# Using the optional query parameters allows us to filter by date, MP, party, etc. without having to create a new endpoint for each combination
+# And dynamically create the query based on the parameters passed while keeping the URL clean, e.g. /get_speeches?mp_name=Max%20Mustermann&date_from=2020-01-01&date_to=2020-12-31
+@router.get("/get_speeches", tags=["speeches"])
+async def get_speeches(
     mp_name: Union[str, None] = None,
     date_from: Union[str, None] = None,
     date_to: Union[str, None] = None,
@@ -24,8 +27,8 @@ async def get_missing(
     pass
 
 
-@router.get("/get_missing/{party}", tags=["missing"])
-async def get_missing_party(
+@router.get("/get_speeches/{party}", tags=["speeches"])
+async def get_speeches_party(
     party: str, date_from: Union[str, None] = None, date_to: Union[str, None] = None
 ):
     """
@@ -38,8 +41,8 @@ async def get_missing_party(
     pass
 
 
-@router.get("/get_missing/{topic}", tags=["missing"])
-async def get_missing_topic(
+@router.get("/get_speeches/{topic}", tags=["speeches"])
+async def get_speeches_topic(
     topic: str, date_from: Union[str, None] = None, date_to: Union[str, None] = None
 ):
     """
@@ -52,4 +55,4 @@ async def get_missing_topic(
     pass
 
 
-# Path: backend/app/routers/speech.py
+# Path: backend/app/routers/missing.py

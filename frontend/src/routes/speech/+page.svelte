@@ -46,8 +46,8 @@
 	<div class="hero-content">
 		{#key $isDark}
 			{#if !active_filter.active}
-				<div class="grid justify-items-center grid-cols-2 gap-2 py-4 px-4">
-					<div class="card w-96 glass {textcolor}">
+				<div class="grid justify-items-center grid-cols-2 gap-2 py-4 px-4 sm:grid-cols-1 ">
+					<div class="card w-full glass {textcolor}">
 						<div class="card-body items-center text-center">
 							<h2 class="card-title">Themen</h2>
 							<p>Suche nach Reden basiernd auf Schlüsselwörtern die in ihnen enthalten sind.</p>
@@ -61,7 +61,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="card w-96 glass {textcolor}">
+					<div class="card w-full glass {textcolor}">
 						<div class="card-body items-center text-center">
 							<h2 class="card-title">Redner</h2>
 							<p>Suche nach Reden von bestimmten Personen</p>
@@ -75,7 +75,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="card w-96 glass {textcolor}">
+					<div class="card w-full glass {textcolor}">
 						<div class="card-body items-center text-center">
 							<h2 class="card-title">Partei</h2>
 							<p>Suche nach Reden basierend auf der vortragenden Partei</p>

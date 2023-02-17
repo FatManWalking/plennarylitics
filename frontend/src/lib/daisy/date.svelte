@@ -16,7 +16,7 @@
 	$: to_date, check_dates();
 </script>
 
-<div class="card w-96 glass">
+<div class="card w-full glass">
 	<div class="card-body items-center text-center {textcolor}">
 		<h2 class="card-title">Zeitraum</h2>
 		<p>Suche nach Reden basierend auf einem Zeitraum</p>

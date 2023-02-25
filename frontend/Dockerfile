@@ -1,23 +1,21 @@
-FROM node:17-slim as builder
+FROM node:18-slim
 
-WORKDIR /app
 
-COPY package.json ./
-RUN rm -rf node_modules
-RUN rm -rf build
+WORKDIR /usr/src/webapp
+RUN echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
 
-COPY . .
+COPY ./svelte.config.js ./
+COPY ./vite.config.ts ./
+COPY ./package*.json ./
 
 RUN npm install
-RUN npm run build
+RUN npm update
 
-FROM node:17-slim as runner
-
-WORKDIR /app
-COPY --from=builder /app/build ./build
-COPY --from=builder /app/package.json ./package.json
-
-RUN npm install --production
+USER root
+COPY ./ ./
 
 EXPOSE 3000
-ENTRYPOINT ["npm", "run", "start"]
+
+ENV HOST=0.0.0.0
+
+CMD ["npm", "run", "dev"]

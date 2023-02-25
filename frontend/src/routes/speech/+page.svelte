@@ -5,6 +5,7 @@
 	import Datepicker from '$lib/daisy/date.svelte';
 	import { title } from '$lib/stores/title.store';
 	import { onMount, onDestroy } from 'svelte';
+	import Display from './display.svelte';
 
 	// On mount set title to 'Speeches'
 	onMount(() => {
@@ -44,8 +45,8 @@
 >
 	<div class="hero-overlay bg-opacity-60" />
 	<div class="hero-content">
-		{#key $isDark}
-			{#if !active_filter.active}
+		{#if !active_filter.active}
+			{#key $isDark}
 				<div class="grid justify-items-center grid-cols-2 gap-2 py-4 px-4 sm:grid-cols-1 ">
 					<div class="card w-full glass {textcolor}">
 						<div class="card-body items-center text-center">
@@ -113,9 +114,9 @@
 						>
 					</div>
 				</div>
-			{:else}
-				<p>Placeholder</p>
-			{/if}
-		{/key}
+			{/key}
+		{:else}
+			<Display />
+		{/if}
 	</div>
 </div>

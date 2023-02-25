@@ -39,6 +39,7 @@
 	"type": "module",
 	"dependencies": {
 		"@sveltejs/pancake": "^0.0.18",
-		"daisyui": "^2.50.0"
+		"daisyui": "^2.50.0",
+		"svelte-time": "^0.7.1"
 	}
 }

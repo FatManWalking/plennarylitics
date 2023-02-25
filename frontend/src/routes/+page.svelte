@@ -25,6 +25,11 @@
 			<div class="carousel carousel-center rounded-box pt-4">
 				<div id="slide1" class="carousel-item relative w-full">
 					<Card klass={textcolor} link="/speech">
+						<h2 slot="title">
+							Reden
+							<div class="badge badge-secondary">NEW</div>
+						</h2>
+						<p slot="description">Schlage Plenardebatten nach Datum, Thema oder Sprecher nach.</p>
 						<p slot="button">Zu den Reden</p>
 					</Card>
 					<div

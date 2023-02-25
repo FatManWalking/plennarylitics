@@ -39,81 +39,80 @@
 
 <!-- Site to display the queried documents and provide a reader for a specific selected one-->
 <!-- Info on how many been found and button to reset filter -->
-
-{#if speeches.length > 0}
-	<div class="grid grid-rows-4 justify-self-start">
-		<div class="stats shadow">
-			<div class="stat">
-				<div class="stat-figure text-secondary">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						class="inline-block w-8 h-8 stroke-current"
-						><path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
-						/></svg
-					>
-				</div>
-				<div class="stat-title">Reden</div>
-				<div class="stat-value">{speeches.length}</div>
-				<div class="stat-desc">gefunden</div>
-				<div class="stat-actions">
-					<button class="btn btn-sm btn-success">Zurück zum Filter</button>
-				</div>
-			</div>
-		</div>
-		<!-- List all speeches on the left and display the current one on the right -->
-		<div class="row-span-3 h-full carousel carousel-vertical rounded-box">
-			{#each speeches as speech, i}
-				<div class="carousel-item w-full py-4">
-					<div class="stats bg-primary text-primary-content">
-						<div class="stat ">
-							<div class="stat-title">Redner</div>
-							<div class="stat-value text-base">{speech.speaker}</div>
-							<div class="stat-actions">
-								<button
-									class="btn btn-sm btn-success"
-									on:click={(e) => (changeSpeech(speeches[i]), console.log(currentSpeech.text))}
-									>Mehr lesen</button
-								>
-							</div>
-						</div>
-
-						<div class="stat">
-							<div class="stat-title">Partei</div>
-							<div class="stat-value text-base">{speech.party}</div>
-						</div>
-
-						<div class="stat">
-							<div class="stat-title">Datum</div>
-							<div class="stat-value text-base"><Time timestamp={speech.date} /></div>
-						</div>
+<div class="flex flex-row gap-4 content-evenly">
+	{#if speeches.length > 0}
+		<div class="basis-1/3 shrink-0">
+			<div class="stats shadow w-full">
+				<div class="stat">
+					<div class="stat-figure text-secondary">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							class="inline-block w-8 h-8 stroke-current"
+							><path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+							/></svg
+						>
+					</div>
+					<div class="stat-title">Reden</div>
+					<div class="stat-value">{speeches.length}</div>
+					<div class="stat-desc">gefunden</div>
+					<div class="stat-actions">
+						<button class="btn btn-sm btn-success">Zurück zum Filter</button>
 					</div>
 				</div>
-			{/each}
-		</div>
-	</div>
-	{#key currentSpeech}
-		<div class="card h-96 w-full bg-neutral my-4 overflow-auto">
-			<div class="hero-content text-center text-neutral-content">
-				<div class="max-w-md">
-					<h1 class="mb-5 text-xl font-bold">
-						{currentSpeech.speaker} am <Time timestamp={currentSpeech.date} />
-					</h1>
-					<p class="mb-5">{currentSpeech.text}</p>
-				</div>
+			</div>
+			<!-- List all speeches on the left and display the current one on the right -->
+			<div class="h-full carousel carousel-vertical rounded-box">
+				{#each speeches as speech, i}
+					<div class="carousel-item w-full py-4">
+						<div class="stats bg-primary text-primary-content">
+							<div class="stat ">
+								<div class="stat-title">Redner</div>
+								<div class="stat-value text-base">{speech.speaker}</div>
+								<div class="stat-actions">
+									<button
+										class="btn btn-sm btn-success"
+										on:click={(e) => (changeSpeech(speeches[i]), console.log(currentSpeech.text))}
+										>Mehr lesen</button
+									>
+								</div>
+							</div>
+
+							<div class="stat">
+								<div class="stat-title">Partei</div>
+								<div class="stat-value text-base">{speech.party}</div>
+							</div>
+
+							<div class="stat">
+								<div class="stat-title">Datum</div>
+								<div class="stat-value text-base"><Time timestamp={speech.date} /></div>
+							</div>
+						</div>
+					</div>
+				{/each}
 			</div>
 		</div>
-	{/key}
-{:else}
-	<div class="w-full py-4">
-		<div class="card w-96 glass">
-			<div class="hero-content text-center text-neutral-content">
-				<div class="max-w-md">
+		{#key currentSpeech}
+			<div class="card w-full bg-neutral overflow-auto">
+				<div class="hero-content text-center text-neutral-content">
+					<div class="max-w-md">
+						<h1 class="mb-5 text-xl font-bold">
+							{currentSpeech.speaker} am <Time timestamp={currentSpeech.date} />
+						</h1>
+						<p class="mb-5">{currentSpeech.text}</p>
+					</div>
+				</div>
+			</div>
+		{/key}
+	{:else}
+		<div class="basis-2/3 shrink-0 w-full">
+			<div class="card glass">
+				<div class="hero-content text-center text-neutral-content">
 					<h1 class="mb-5 text-5xl font-bold">Ruhe.</h1>
 					<p class="mb-5">
 						Dein Suchergebis ist leider so leer wie dieser Bundestag. Versuche es doch mit einem
@@ -123,5 +122,5 @@
 				</div>
 			</div>
 		</div>
-	</div>
-{/if}
+	{/if}
+</div>

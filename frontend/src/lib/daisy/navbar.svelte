@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Themeswitcher from './theme.svelte';
 	import { title } from '../stores/title.store';
+	export const klass: string = '';
 </script>
 
-<div class="navbar bg-neutral shadow-md">
+<div class="navbar bg-neutral shadow-md {klass}">
 	<div class="navbar-start">
 		<div class="dropdown">
 			<!-- svelte-ignore a11y-label-has-associated-control -->

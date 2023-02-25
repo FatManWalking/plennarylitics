@@ -40,11 +40,11 @@
 </script>
 
 <div
-	class="hero max-h-screen"
+	class="hero min-h-screen"
 	style="background-image: url(https://assets.deutschlandfunk.de/FILE_bee61ad621284fe91efe0037638b78b3/1920x1080.jpg?t=1597611045233);"
 >
-	<div class="hero-overlay bg-opacity-60" />
-	<div class="hero-content">
+	<div class="hero-overlay bg-opacity-60 w-full h-full" />
+	<div class="hero-content w-full h-full">
 		{#if !active_filter.active}
 			{#key $isDark}
 				<div class="grid justify-items-center grid-cols-2 gap-2 py-4 px-4 sm:grid-cols-1 ">

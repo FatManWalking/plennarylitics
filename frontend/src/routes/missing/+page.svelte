@@ -161,6 +161,7 @@
 	<Form bind:selected={selected_party} />
 </div>
 
+
 <style>
 	.chart {
 		position: relative;

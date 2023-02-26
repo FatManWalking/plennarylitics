@@ -49,35 +49,31 @@ services:
     networks:
       - es-net
 
-  # backend-setup:
-  #   container_name: backend-setup
-  #   build:
-  #     context: .
-  #     dockerfile: ./backend/Dockerfile
-  #   depends_on:
-  #     - backend
-  #   restart: "no"
-  #   entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"
-  #   networks:
-  #     - es-net
-
-  frontend:
-    container_name: frontend
+  backend-setup:
+    container_name: backend-setup
     build:
-      context: ./frontend
-      dockerfile: ./Dockerfile
-    environment:
-      - Backend_URL=http://backend:8080
-    volumes:
-      - ./frontend/src:/usr/src/webapp/src
-    ports:
-      - "3000:3000"
+      context: .
+      dockerfile: ./backend/Dockerfile
     depends_on:
       - backend
+    restart: "no"
+    entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"
+    networks:
+      - es-net
+
+  frontend:
+    build:
+       context: ./frontend
+       dockerfile: ./Dockerfile
+    environment:
+       - Backend_URL=http://backend:8080
+    ports:
+       - "3000:3000"
+    depends_on:
+       - backend
     networks:
       - es-net
 
 networks:
   es-net:
     driver: bridge
-    external: false

@@ -36,6 +36,14 @@
 		from_date,
 		to_date
 	};
+
+	import { post } from '$lib/api';
+
+	// use active filter as body for get request
+	async function search() {
+		const data: object = await post('speech', active_filter);
+		console.log(data);
+	}
 </script>
 
 <div
@@ -103,6 +111,7 @@
 									from_date,
 									to_date
 								};
+								search();
 							}}
 						>
 							Suche starten

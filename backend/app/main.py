@@ -64,20 +64,18 @@ def missing_mp(mp_name: str):
     if es is not None:
         # Query to find all documents where the selected MP is missing
         search_object = {
-            "query": {
-                "multi_match": {
-                    "query": mp_name,
-                    "type": "phrase_prefix",
-                    "fields": [
-                        "missing_AFD",
-                        "missing_CDUCSU",
-                        "missing_DIELINKE",
-                        "missing_FDP",
-                        "missing_SPD",
-                        "missing_GRUENE",
-                        "missing_FRAKTIONSLOS",
-                    ],
-                }
+            "multi_match": {
+                "query": mp_name,
+                "type": "phrase_prefix",
+                "fields": [
+                    "missing_AFD",
+                    "missing_CDUCSU",
+                    "missing_DIELINKE",
+                    "missing_FDP",
+                    "missing_SPD",
+                    "missing_GRUENE",
+                    "missing_FRAKTIONSLOS",
+                ],
             },
             "highlight": {
                 "fields": {
@@ -93,7 +91,7 @@ def missing_mp(mp_name: str):
             "size": 10000,
         }
 
-        res = es.search(index="bjoerns_test_missing", body=search_object)
+        res = es.search(index="ichtestegerne_*", query=search_object)
     else:
         return {"Error": "Elasticsearch is not available"}
 
@@ -116,17 +114,15 @@ def remarks_mp(mp_name: str):
     es = get_es_client()
     if es is not None:
         search_object = {
-            "query": {
-                "multi_match": {
-                    "query": mp_name,
-                    "type": "phrase_prefix",
-                    "fields": ["Remarking Persons"],
-                }
+            "multi_match": {
+                "query": mp_name,
+                "type": "phrase_prefix",
+                "fields": ["Remarking Persons"],
             },
             "size": 10000,
         }
 
-        res = es.search(index="bjoerns_test_remarks", body=search_object)
+        res = es.search(index="bjoerns_test_remarks", query=search_object)
     else:
         print("Elasticsearch is not available")
         return {}
@@ -174,9 +170,9 @@ def query_es():
 
     es = get_es_client()
     if es is not None:
-        search_object = {"query": {"match_all": {}}}
+        search_object = {"match_all": {}}
         index_name = "f2*"
-        res = es.search(index=index_name, body=json.dumps(search_object))
+        res = es.search(index=index_name, query=search_object)
     else:
         print("Elasticsearch is not available")
         return {}

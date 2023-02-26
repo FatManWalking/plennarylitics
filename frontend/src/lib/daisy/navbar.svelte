@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Themeswitcher from './theme.svelte';
+	import { title } from '../stores/title.store';
 </script>
 
 <div class="navbar bg-neutral shadow-md">
@@ -26,18 +27,16 @@
 				class="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-base-100 p-2 font-poppins shadow"
 			>
 				<li><a href="/">Homepage</a></li>
-				<li><a href="/test">Scholz</a></li>
-				<li><a href="/parteistatistik">Parteistatistik</a></li>
-				<li><a href="/themenübersicht">Themenübersicht</a></li>
+				<li><a href="/speech">Reden</a></li>
+				<li><a href="/missing">Abwesenheit</a></li>
+				<li><a href="/interjection">Zwischenrufe</a></li>
 				<li><a href="/about">Über uns</a></li>
 			</ul>
 		</div>
 	</div>
 	<div class="navbar-center">
 		<!-- svelte-ignore a11y-missing-attribute -->
-		<a class="upper-case btn btn-ghost font-poppins text-xl text-teal-300" href="/"
-			>Plannarilytics</a
-		>
+		<a class="upper-case btn btn-ghost font-poppins text-xl text-teal-300" href="/">{$title}</a>
 	</div>
 	<div class="navbar-end">
 		<Themeswitcher />

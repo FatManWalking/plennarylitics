@@ -1,17 +1,12 @@
 <script lang="ts">
 	import Card from '$lib/daisy/card.svelte';
 
-	import { goto } from '$app/navigation';
-
-	const preserveScroll = (url: string) => {
-		goto(url, {
-			noScroll: true
-		});
-	};
+	import { preserveScroll, change_color } from '$lib/utils';
 
 	import { isDark } from '$lib/stores/theme.store';
 
-	const textcolor = isDark ? 'text-neutral-900' : 'text-neutral-100';
+	let textcolor: string;
+	$: $isDark, (textcolor = change_color($isDark));
 </script>
 
 <div
@@ -29,7 +24,9 @@
 
 			<div class="carousel carousel-center rounded-box pt-4">
 				<div id="slide1" class="carousel-item relative w-full">
-					<Card klass={textcolor} link="/speaches" />
+					<Card klass={textcolor} link="/speech">
+						<p slot="button">Zu den Reden</p>
+					</Card>
 					<div
 						class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2"
 					>
@@ -92,7 +89,7 @@
 		</div>
 	</div>
 
-	<div class="chat chat-start place-self-end">
+	<!-- <div class="chat chat-start place-self-end">
 		<div class="chat-image avatar">
 			<div class="w-10 rounded-full">
 				<img
@@ -102,5 +99,5 @@
 			</div>
 		</div>
 		<div class="chat-bubble">It was said that you would, destroy the Sith, not join them.</div>
-	</div>
+	</div> -->
 </div>

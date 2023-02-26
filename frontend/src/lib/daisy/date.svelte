@@ -6,7 +6,6 @@
 
 	// Function to check "from" is "before" to date
 	function check_dates() {
-		console.log('check');
 		if (from_date > to_date) {
 			from_date = to_date;
 		}

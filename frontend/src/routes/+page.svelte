@@ -1,12 +1,26 @@
 <script lang="ts">
 	import Card from '$lib/daisy/card.svelte';
-
 	import { preserveScroll, change_color } from '$lib/utils';
-
 	import { isDark } from '$lib/stores/theme.store';
+	import { onMount } from 'svelte';
+	import { get } from '$lib/api';
 
 	let textcolor: string;
 	$: $isDark, (textcolor = change_color($isDark));
+
+	onMount(async () => {
+		const data: object = await get('');
+		if (data.hasOwnProperty('plennarylitics')) {
+			// reached backend
+			// console.log(data);
+		} else {
+			// something went wrong
+			console.log('something went wrong', data);
+		}
+
+		// trigger is dark mode
+		$isDark = true;
+	});
 </script>
 
 <div

@@ -68,6 +68,8 @@ services:
       dockerfile: ./Dockerfile
     environment:
       - Backend_URL=http://backend:8080
+    volumes:
+      - ./frontend/src:/usr/src/webapp/src
     ports:
       - "3000:3000"
     depends_on:

@@ -7,7 +7,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import Display from './display.svelte';
 	import { post, get } from '$lib/api';
-	import { type ESResult, ESDocument } from '$lib/types';
+	import type { ESResult, ESDocument } from '$lib/types';
 
 	// On mount set title to 'Speeches'
 	onMount(() => {

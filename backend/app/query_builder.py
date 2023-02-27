@@ -30,7 +30,10 @@ class Query:
                         # { "term": {"missing_AFD": "1"} } # Exact match where there must be a 1 in the field missing_AFD
                     ],
                 },
-            }
+            },
+            "aggs": {
+                "uniqueDocs": {"terms": {"field": "_id"}}
+            }  # Collapsing is used to group the results by a specific field and e.g. only show the first result per group},
             # "aggs": { "types_count": ...   # Aggregations are used to group the results by a specific field and e.g. count the number of results per group
         }
 
@@ -48,6 +51,12 @@ class Query:
         return self.query
 
     # First more generic, then more specific (e.g. add_date before add_missing_mp_name)
+
+    def add_collapsing(self, field: str):
+        """
+        Adds collapsing to the query
+        """
+        self.query["collapse"] = {"field": field}
 
     # TESTED
     def add_date(

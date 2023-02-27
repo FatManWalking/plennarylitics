@@ -6,8 +6,8 @@
 
 	import Time, { svelteTime } from 'svelte-time';
 	import { dayjs } from 'svelte-time';
-
-	let time = dayjs().format('MMM DD, YYYY');
+	import { post, get } from '$lib/api';
+	import type { ESDocument, ESResult } from '$lib/types';
 
 	interface Speech {
 		speaker: string;
@@ -15,6 +15,8 @@
 		party: string;
 		date: Date;
 	}
+
+	let time = dayjs().format('MMM DD, YYYY');
 
 	let speeches: Speech[] = [
 		{
@@ -34,6 +36,13 @@
 	let currentSpeech: Speech = speeches[0];
 	function changeSpeech(speech: Speech) {
 		currentSpeech = speech;
+	}
+
+	// use active filter as body for get request
+	async function search() {
+		const data: ESResult = await get('test/Krankenhäuser');
+
+		let found_speeches: ESDocument[] = data.hits.hits;
 	}
 </script>
 

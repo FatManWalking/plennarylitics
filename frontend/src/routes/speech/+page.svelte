@@ -6,7 +6,7 @@
 	import { title } from '$lib/stores/title.store';
 	import { onMount, onDestroy } from 'svelte';
 	import Display from './display.svelte';
-	import { post, get } from '$lib/api';
+
 	import type { ESResult, ESDocument } from '$lib/types';
 
 	// On mount set title to 'Speeches'
@@ -39,16 +39,6 @@
 		from_date,
 		to_date
 	};
-
-	let found_speeches: ESDocument[]; // Array of found speeches
-
-	// use active filter as body for get request
-	async function search() {
-		const data: ESResult = await get('test/Krankenhäuser');
-
-		found_speeches = data.hits.hits;
-		console.log(found_speeches);
-	}
 </script>
 
 <div
@@ -116,7 +106,6 @@
 									from_date,
 									to_date
 								};
-								search();
 							}}
 						>
 							Suche starten

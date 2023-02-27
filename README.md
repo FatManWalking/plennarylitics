@@ -54,6 +54,17 @@ Up to this point, we are including 50 files from the current legislative period 
 
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 
+# Instructions for runnging the Code
+
+1. Make sure docker is running on your system
+2. In the Project directory, run docker compose build
+3. In the Project directory, run docker compose up
+4. The Project parts are available on the following ports:
+  * Elasticsearch: localhost:9200
+  * Kibana: localhost:5601
+  * Frontend: localhost:3000
+  * Swagger UI: localhost:8080
+
 ## Week 44/45
 
 * Setting up project proposal
@@ -96,4 +107,32 @@ Up to this point, we are including 50 files from the current legislative period 
 * Conception of Frontend Data Visualisations
 * Code Cleanup
 * Conception of interesting insights with the Data we currently have
+
+## Week 3/4
+* Working on Report
+* Frontend Creation
+* Bug fixing in Data extraction code
+
+## Week 5
+* Frontend Creation
+* Backend creation
+* Bug fixing in Data creation code
+
+## Week 6
+* Working on report
+* Backend creation
+
+## Week 7
+* Docker Bug Fixing
+* Gathering of Data Results
+
+## Week 8
+* Docker Bug Fixing
+* Fast API Endpoint creation
+* Presentation creation
+
+## Week 9
+* Frontend Finalization
+* Fast API Endpoint creation
+* Presentation recording
 

@@ -40,6 +40,7 @@ class Query:
         #         extra_function = getattr(self, f"{extra[0]}")
         #         extra_function(extra[1])
 
+    # TESTED
     def get_query(self) -> Mapping[str, Any]:
         """
         Returns the query
@@ -48,6 +49,7 @@ class Query:
 
     # First more generic, then more specific (e.g. add_date before add_missing_mp_name)
 
+    # TESTED
     def add_date(
         self,
         from_date: str = datetime.utcfromtimestamp(0).strftime("%Y-%m-%d"),
@@ -60,6 +62,7 @@ class Query:
             {"range": {"Datum": {"gte": from_date, "lte": to_date}}}
         )
 
+    # TESTED
     def add_topic(self, topic: str):
         """
         Adds the topic to the query

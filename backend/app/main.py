@@ -152,6 +152,29 @@ def test_querybuilder(from_date: str, to_date: str):
     return res
 
 
+@app.get("/test/{topic}")
+def test(topic: str):
+    """
+    :param topic: topic to be queried
+    :return: response from Elasticsearch
+    """
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        query = Query()
+        query.add_topic(topic=topic)
+
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=speech_index, query=query.get_query()["query"])
+    else:
+        return {"Error": "Elasticsearch is not available"}
+
+    return res
+
+
 @app.get("/get_missing/{mp_name}")
 def missing_mp(mp_name: str):
     """

@@ -5,6 +5,8 @@
 	import Datepicker from '$lib/daisy/date.svelte';
 	import { title } from '$lib/stores/title.store';
 	import { onMount, onDestroy } from 'svelte';
+	import { post, get } from '$lib/api';
+	import { type ESResult, ESDocument } from '$lib/types';
 
 	// On mount set title to 'Speeches'
 	onMount(() => {
@@ -37,12 +39,14 @@
 		to_date
 	};
 
-	import { post } from '$lib/api';
+	let found_speeches: ESDocument[]; // Array of found speeches
 
 	// use active filter as body for get request
 	async function search() {
-		const data: object = await post('speech', active_filter);
-		console.log(data);
+		const data: ESResult = await get('test/Krankenhäuser');
+
+		found_speeches = data.hits.hits;
+		console.log(found_speeches);
 	}
 </script>
 

@@ -1,4 +1,4 @@
-from typing import Union, Dict, List
+from typing import Union, Dict, List, Tuple
 from enum import Enum
 import json
 from fastapi import FastAPI
@@ -6,6 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import Elasticsearch
 
 from .routers import speech, missing, remark
+
+from .query_builder import Query
+
+# TODO: get indices as environment variables
+missing_index = "missing_v2"
+speech_index = "speeches_v2"
+remark_index = "remarks_v2"
 
 app = FastAPI()
 
@@ -38,6 +45,17 @@ class Party(Enum):
 headers = {"Access-Control-Allow-Origin": "*"}
 
 
+def get_es_client():
+    return Elasticsearch(
+        "http://elasticsearch:9200",
+        verify_certs=False,
+        timeout=60,
+        retry_on_timeout=True,
+        max_retries=5,
+    )
+
+
+# Tested
 @app.get("/")
 def read_root():
     return {
@@ -49,6 +67,44 @@ def read_root():
     }
 
 
+@app.get("/health/es")
+def health_es():
+    """
+    Check if Elasticsearch is available
+    :return: Elasticsearch version
+    """
+    es = get_es_client()
+    if es is not None:
+        return es.info()
+    else:
+        return {"Elasticsearch": "is not available"}
+
+
+@app.get("/health/test")
+def query_es():
+    """
+    We can use the elasticsearch_dsl library to build the query
+    Establish connection to Elasticsearch and then pass the query
+    Here we simply pass a match_all query to test if all is well
+
+    :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"query": {"match_all": {}}} or {"query": {"match": {"title": "test"}}}
+    :param index_name: name of the index to be queried
+    :return: response from Elasticsearch
+    """
+
+    es = get_es_client()
+    if es is not None:
+        search_object = {"match_all": {}}
+        index_name = "f2*"
+        res = es.search(index=index_name, query=search_object)
+    else:
+        print("Elasticsearch is not available")
+        return {}
+
+    return res
+
+
+# Tested [speeches_v2]
 @app.get("/search/{index_name}")
 def search(index_name: str):
     """
@@ -68,6 +124,30 @@ def search(index_name: str):
 
     # Number of hits we got back
     print(f"res: {res['hits']['total']['value']}")
+
+    return res
+
+
+# Tested [speeches_v2]
+@app.get("/test_querybuilder/{from_date}/{to_date}")
+def test_querybuilder(from_date: str, to_date: str):
+    """
+    :param date: date range to be queried
+    :return: response from Elasticsearch
+    """
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        query = Query()
+        query.add_date(from_date=from_date, to_date=to_date)
+
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=speech_index, query=query.get_query()["query"])
+    else:
+        return {"Error": "Elasticsearch is not available"}
 
     return res
 
@@ -110,7 +190,7 @@ def missing_mp(mp_name: str):
             "size": 10000,
         }
 
-        res = es.search(index="ichtestegerne_*", query=search_object)
+        res = es.search(index=missing_index, query=search_object)
     else:
         return {"Error": "Elasticsearch is not available"}
 
@@ -121,7 +201,7 @@ def missing_mp(mp_name: str):
 
 
 @app.get("/get_missing_by_date/{date}")
-def search(date: str):
+def missing_date(date: str):
     """
     :param index_name: name of the index to be queried
     #TODO: add query as a parameter
@@ -178,7 +258,7 @@ def remarks_mp(mp_name: str):
 
 
 @app.get("/get_remarks_by_speaker_of_speech/{mp_name}")
-def search(mp_name: str):
+def remarks_speaker(mp_name: str):
     """
     :param index_name: name of the index to be queried
     #TODO: add query as a parameter
@@ -211,7 +291,7 @@ def search(mp_name: str):
 
 
 @app.get("/get_remarks_by_party_of_speaker/{party_name}")
-def search(party_name: str):
+def remarks_speaker_party(party_name: str):
     """
     :param index_name: name of the index to be queried
     :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"match_all": {}} or {"match": {"title": "test"}}
@@ -244,7 +324,7 @@ def search(party_name: str):
 
 
 @app.get("/get_remarks_by_party_of_remarker/{party_name}")
-def search(party_name: str):
+def remarks_remarker_party(party_name: str):
     """
     :param index_name: name of the index to be queried
     :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"match_all": {}} or {"match": {"title": "test"}}
@@ -277,7 +357,7 @@ def search(party_name: str):
 
 
 @app.get("/get_missing_mps_by_party/{party_name}")
-def search(party_name: str):
+def missing_party(party_name: str):
     """
     :param index_name: name of the index to be queried
     :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"match_all": {}} or {"match": {"title": "test"}}
@@ -340,7 +420,7 @@ def search(party_name: str):
 
 
 @app.get("/get_speech_by_speaker/{mp_name}")
-def search(mp_name: str):
+def speech_speaker(mp_name: str):
     """
     :param index_name: name of the index to be queried
     :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"match_all": {}} or {"match": {"title": "test"}}
@@ -373,7 +453,7 @@ def search(mp_name: str):
 
 
 @app.get("/get_speech_by_party/{party_name}")
-def search(party_name: str):
+def speech_party(party_name: str):
     """
     :param index_name: name of the index to be queried
     :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"match_all": {}} or {"match": {"title": "test"}}
@@ -406,7 +486,7 @@ def search(party_name: str):
 
 
 @app.get("/get_speech_by_date/{date}")
-def search(date: str):
+def speech_date(date: str):
     """
     :param index_name: name of the index to be queried
     :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"match_all": {}} or {"match": {"title": "test"}}
@@ -425,52 +505,5 @@ def search(date: str):
 
     # Number of hits we got back
     print(f"res: {res['hits']['total']['value']}")
-
-    return res
-
-
-def get_es_client():
-    return Elasticsearch(
-        "http://elasticsearch:9200",
-        verify_certs=False,
-        timeout=60,
-        retry_on_timeout=True,
-        max_retries=5,
-    )
-
-
-@app.get("/health/es")
-def health_es():
-    """
-    Check if Elasticsearch is available
-    :return: Elasticsearch version
-    """
-    es = get_es_client()
-    if es is not None:
-        return es.info()
-    else:
-        return {"Elasticsearch": "is not available"}
-
-
-@app.get("/health/test")
-def query_es():
-    """
-    We can use the elasticsearch_dsl library to build the query
-    Establish connection to Elasticsearch and then pass the query
-    Here we simply pass a match_all query to test if all is well
-
-    :param query: query to be passed to Elasticsearch in the form of a dictionary e.g. {"query": {"match_all": {}}} or {"query": {"match": {"title": "test"}}}
-    :param index_name: name of the index to be queried
-    :return: response from Elasticsearch
-    """
-
-    es = get_es_client()
-    if es is not None:
-        search_object = {"match_all": {}}
-        index_name = "f2*"
-        res = es.search(index=index_name, query=search_object)
-    else:
-        print("Elasticsearch is not available")
-        return {}
 
     return res

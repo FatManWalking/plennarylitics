@@ -54,7 +54,7 @@ Up to this point, we are including 50 files from the current legislative period 
 
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 
-# Instructions for runnging the Code
+# Instructions for running the Code
 
 1. Make sure docker is running on your system
 2. In the Project directory, run docker compose build
@@ -64,6 +64,15 @@ Up to this point, we are including 50 files from the current legislative period 
   * Kibana: localhost:5601
   * Frontend: localhost:3000
   * Swagger UI: localhost:8080
+  
+ After you have run Docker compose, the script will start pulling and loading plenary transcripts immediately. If you should recieve an error notice, that an Index is missing in Elasticsearch, please run the following commands via cmd to create the indexes that are missing:
+ 
+curl -X PUT "localhost:9200/missing_mps?pretty"
+curl -X PUT "localhost:9200/remarks?pretty"
+curl -X PUT "localhost:9200/speeches?pretty"
+
+For more Information about the setup of our application, please refer to the report.
+
 
 ## Week 44/45
 

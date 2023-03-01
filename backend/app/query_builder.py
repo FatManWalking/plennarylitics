@@ -78,13 +78,18 @@ class Query:
         """
         self.query["query"]["bool"]["must"].append({"match": {"Text": topic}})
 
+    def add_missing_all(self):
+        """
+        Adds a aggregation of of all missing mps to the query
+        """
+
     # All MP related functions
 
     def add_missing_mp_name(self, mp_name: str):
         """
         Adds the MP name to the query
         """
-        self.query["query"]["bool"]["must"].append(
+        self.query["query"]["bool"]["filter"].append(
             {"multi_match": {"query": mp_name, "fields": ["missing_*"]}}
         )
 
@@ -100,7 +105,7 @@ class Query:
         """
         Adds the MP name to the query
         """
-        self.query["query"]["bool"]["must"].append(
+        self.query["query"].append(
             {"multi_match": {"query": mp_name, "fields": ["Sprecher der Rede"]}}
         )
 

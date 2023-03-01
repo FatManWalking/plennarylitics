@@ -175,50 +175,26 @@ def test(topic: str):
     return res
 
 
-@app.get("/get_missing/{mp_name}")
-def missing_mp(mp_name: str):
+# Tested [missing_v2]
+@app.get("/missing_mp/{mp_name}")
+def test_mp(mp_name: str):
     """
-    :param index_name: name of the index to be queried
+    :param mp_name: name of the MP to be queried
     :return: response from Elasticsearch
     """
 
+    # Test query
     es = get_es_client()
     if es is not None:
-        # Query to find all documents where the selected MP is missing
-        search_object = {
-            "multi_match": {
-                "query": mp_name,
-                "type": "phrase_prefix",
-                "fields": [
-                    "missing_AFD",
-                    "missing_CDUCSU",
-                    "missing_DIELINKE",
-                    "missing_FDP",
-                    "missing_SPD",
-                    "missing_GRUENE",
-                    "missing_FRAKTIONSLOS",
-                ],
-            },
-            "highlight": {
-                "fields": {
-                    "missing_AFD": {},
-                    "missing_CDUCSU": {},
-                    "missing_DIELINKE": {},
-                    "missing_FDP": {},
-                    "missing_SPD": {},
-                    "missing_GRUENE": {},
-                    "missing_FRAKTIONSLOS": {},
-                }
-            },
-            "size": 10000,
-        }
+        query = Query()
+        query.add_missing_mp_name(mp_name=mp_name)
 
-        res = es.search(index=missing_index, query=search_object)
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=missing_index, query=query.get_query()["query"])
     else:
         return {"Error": "Elasticsearch is not available"}
-
-    # Number of hits we got back
-    print(f"res: {res}")
 
     return res
 

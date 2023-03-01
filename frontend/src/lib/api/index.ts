@@ -3,6 +3,7 @@ let BACKEND_URL = 'http://localhost:8080' as string;
 export async function get<T>(path: string): Promise<T> {
 	console.log(`getting from ${BACKEND_URL}/${path}`);
 	const response = await fetch(`${BACKEND_URL}/${path}`);
+	console.log(`response: ${response}`);
 	return response.json();
 }
 

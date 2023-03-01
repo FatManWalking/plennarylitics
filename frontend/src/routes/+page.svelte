@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Card from '$lib/daisy/card.svelte';
+	import Card from '$lib/daisy/Card.svelte';
 	import { preserveScroll, change_color } from '$lib/utils';
 	import { isDark } from '$lib/stores/theme.store';
 	import { onMount } from 'svelte';

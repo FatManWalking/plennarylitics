@@ -22,21 +22,29 @@
 
 	// use active filter as body for get request
 	async function queryES() {
-		// get the result from the backend
-		const data: ESResult = await get(
-			'speeches?keyword=' +
-				active_filter.keyword +
-				'&party=' +
-				active_filter.party +
-				'&speaker=' +
-				active_filter.speaker +
-				'&from_date=' +
-				active_filter.from_date +
-				'&to_date=' +
-				active_filter.to_date
-		);
-
+		// 	// get the result from the backend
 		//const data: ESResult = await get('test/Krankenhäuser');
+
+		let query = 'speeches?';
+		//create query for request
+		for (let key in active_filter) {
+			// from_date or to_date
+			if (key == 'active') continue;
+			else if (key == 'from_date' || key == 'to_date') {
+				query +=
+					key +
+					'=' +
+					// date of format yyyy-mm-dd
+					active_filter[key].toISOString().slice(0, 10) +
+					'&';
+			} else if (active_filter[key] != '') {
+				query += key + '=' + active_filter[key] + '&';
+			}
+		}
+		//remove last '&'
+		query = query.slice(0, -1);
+
+		const data: ESResult = await get(query);
 
 		let found_speeches: ESDocument[] = data.hits.hits;
 		console.log(found_speeches);
@@ -88,7 +96,7 @@
 				<!-- List all speeches on the left and display the current one on the right -->
 				<div class="h-full w-full carousel carousel-vertical rounded-box">
 					{#each result as speech, i}
-						<div class="carousel-item w-full py-4">
+						<div class="carousel-item w-full py-4 px-4">
 							<div class="stats bg-primary text-primary-content">
 								<div class="stat">
 									<div class="stat-title">Redner</div>

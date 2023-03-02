@@ -31,6 +31,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Simple header we can put in front of the API
+headers = {"Access-Control-Allow-Origin": "*"}
 
 
 class Party(Enum):
@@ -41,10 +43,6 @@ class Party(Enum):
     DIELINKE = "DIE LINKE"
     AFD = "AfD"
     FRAKTIONSLOS = "Fraktionslos"
-
-
-# Simple header we can put in front of the API
-headers = {"Access-Control-Allow-Origin": "*"}
 
 
 def get_es_client():
@@ -130,6 +128,31 @@ def search(index_name: str):
     return res
 
 
+# TESTED
+@app.get("/test/{topic}")
+def test(topic: str):
+    """
+    :param topic: topic to be queried
+    :return: response from Elasticsearch
+    """
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        query = Query()
+        query.add_topic(topic=topic)
+
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=speech_index, query=query.get_query()["query"])
+    else:
+        return {"Error": "Elasticsearch is not available"}
+
+    return res
+
+
+# TESTED
 @app.get("/speeches")
 def get_speeches(
     keyword: Optional[str] = None,
@@ -186,29 +209,6 @@ def test_querybuilder(from_date: str, to_date: str):
     if es is not None:
         query = Query()
         query.add_date(from_date=from_date, to_date=to_date)
-
-        # Log the query
-        print(f"query: {query.get_query()}")
-        # Searches for all speeches between the given dates in the speech index
-        res = es.search(index=speech_index, query=query.get_query()["query"])
-    else:
-        return {"Error": "Elasticsearch is not available"}
-
-    return res
-
-
-@app.get("/test/{topic}")
-def test(topic: str):
-    """
-    :param topic: topic to be queried
-    :return: response from Elasticsearch
-    """
-
-    # Test query
-    es = get_es_client()
-    if es is not None:
-        query = Query()
-        query.add_topic(topic=topic)
 
         # Log the query
         print(f"query: {query.get_query()}")

@@ -1,14 +1,11 @@
 <script lang="ts">
 	import { isDark } from '$lib/stores/theme.store';
-	const textcolor = isDark ? 'text-neutral-900' : 'text-neutral-100';
-
-	import * as Pancake from '@sveltejs/pancake';
-	import { spring } from 'svelte/motion';
+	import { change_color } from '$lib/utils';
 	import { onMount } from 'svelte';
-	import data_mock from './data.js';
-
+	import { onDestroy } from 'svelte';
 	import Form from '$lib/daisy/form.svelte';
 	import { post, get } from '$lib/api';
+	import { title } from '$lib/stores/title.store';
 	import type { ESDocument, ESResult } from '$lib/types';
 
 	//FusionCharts
@@ -30,9 +27,18 @@
 	}
 
 	let query: ESResult;
+	let textcolor: string;
+	// On mount set title to 'Speeches'
 	onMount(async () => {
+		title.set('Fehlende Repräsentanten');
+		textcolor = change_color(!$isDark);
 		const res = await get(`missing_mp/Corinna`);
 		console.log(res);
+	});
+
+	// On destroy set title to 'Plenarylitics'
+	onDestroy(() => {
+		title.set('Plenarylitics');
 	});
 
 	let selected_party: string = 'Alle';
@@ -64,8 +70,8 @@
 	};
 	let chartConfig = {
 		type: 'pie2d',
-		width: '100%',
-		height: '100%',
+		width: '400',
+		height: '400',
 
 		renderAt: 'chart-container',
 		dataSource: dataSource
@@ -77,18 +83,13 @@
 	style="background-image: url(https://assets.deutschlandfunk.de/FILE_bee61ad621284fe91efe0037638b78b3/1920x1080.jpg?t=1597611045233);"
 >
 	<div class="hero-overlay bg-opacity-60" />
-	<div class="hero-content text-center underline decoration-4 text-xl font-semibold text-teal-100">
-		<h1 class="uppercase">Fehlende Repräsentanten</h1>
+	<div class="hero-content">
+		<div class="pb-4">
+			<Form bind:selected={selected_party} />
+		</div>
+
+		<div id="chart-container">
+			<SvelteFC {...chartConfig} />
+		</div>
 	</div>
 </div>
-
-<div class="pb-4">
-	<Form bind:selected={selected_party} />
-</div>
-
-<div id="chart-container">
-	<SvelteFC {...chartConfig} />
-</div>
-
-<style>
-</style>

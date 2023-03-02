@@ -72,6 +72,20 @@ class Query:
         """
         self.query["query"]["bool"]["must"].append({"match": {"Text": topic}})
 
+    # TESTED
+    def add_speaker(self, speaker: str):
+        """
+        Adds the speaker to the query
+        """
+        self.query["query"]["bool"]["must"].append({"match": {"Sprecher": speaker}})
+
+    # TESTED
+    def add_party(self, party: str):
+        """
+        Adds the party to the query
+        """
+        self.query["query"]["bool"]["must"].append({"match": {"Partei": party}})
+
     def add_remarks_by_party(self):
         """
         Count the documents by "Remarking Parties"

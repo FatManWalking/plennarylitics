@@ -9,6 +9,7 @@ index_protokolle = "speeches_v2"
 missing_index = "missing_v2"
 index_remarks = "remarks_v2"
 
+# define helper variables
 counter = 0
 last_counter = 0
 last_idDokumentennummer = ""
@@ -47,10 +48,8 @@ def get_missing_mps(document: str) -> tuple:
 
     # This split is done to seperate the Anlagen from the rest of the text, it is the only consistently working string we know of
     document = document.replace(" .", ".")
-    # split = document.split("Stenografischen Bericht")
 
     # This split is done to cut the rest of the file from the missing MPs part of the anlagen.
-    # try:
     split = document.split("Entschuldigte ")
 
     try:
@@ -65,9 +64,7 @@ def get_missing_mps(document: str) -> tuple:
 
     # split into seperate rows to get MP names
     missing = re.split("\d+\.\d+\.\d+", missing_mps)
-
     missing_mps = missing[0].splitlines()
-    # print(missing_mps)
 
     # assign mps to parties
     for element in missing_mps:
@@ -86,13 +83,12 @@ def get_missing_mps(document: str) -> tuple:
 
                 try:
 
-                    switchnames = element[0].split(",")
+                    switchnames = element[0].split(
+                        ","
+                    )  # Switches First Names and Last Names of MPs arounf
                     name = switchnames[1] + " " + switchnames[0]
 
                 except IndexError as e:
-                    # print(
-                    #     e,"Index out of bounds for switchnames. Unordered name is used instead",
-                    # )
                     name = element[0]
 
                 if name == "":
@@ -103,7 +99,6 @@ def get_missing_mps(document: str) -> tuple:
                 break
 
     # Here the complete names of missing mps per meeting are added to a dictionary with the meeting id in format "19XXX" as a key
-
     missing_mp_stats = {
         "Linke": len(party_dict["DIE LINKE"]),
         "CDU": len(party_dict["CDU/CSU"]),
@@ -167,7 +162,7 @@ def get_remarks(
     remark_class = []
     remarks = []
 
-    potentialremarks = re.findall("\((\n*?|[^)]*)\)", text)
+    potentialremarks = re.findall("\((\n*?|[^)]*)\)", text)  # Find potential remarks
 
     for element in potentialremarks:
         if len(element) > 9:
@@ -176,11 +171,16 @@ def get_remarks(
 
     for element in remarks:
         remark_class = []
-        remarking_parties = []
-        remarking_persons = []
+        remarking_parties = []  # Contains values of entire fractions reacting
+        remarking_persons = []  # Contains values of specific persons reacting
         party_remarking_person = []
 
-        for type in ["Beifall", "Lachen", "Heiterkeit", "Zuruf"]:
+        for type in [
+            "Beifall",
+            "Lachen",
+            "Heiterkeit",
+            "Zuruf",
+        ]:  # Classifies reactions that are not thematic
             if type in element:
                 remark_class.append(type)
                 remarking_parties.append(get_party(element))
@@ -193,7 +193,9 @@ def get_remarks(
             "[DIELINKE]:",
             "[FRAKTIONSLOS]:",
         ]:
-            if party in element:
+            if (
+                party in element
+            ):  # Classifies reactions that are thematic (done by a person)
 
                 party_remarking_person.append(party[1:-2])
                 list = element.split()
@@ -218,11 +220,13 @@ def get_remarks(
                         remarking_persons.append(pers)
 
                 except ValueError as e:
-                    # print(e, "No remarkign Person found")
+
                     remarking_persons = "None"
 
                 cleaned_list = element.split(party)
                 cleaned_text = cleaned_list.pop()
+
+        # The Following is done to catch different variations of Party names that are used in the plenary protocols
 
         if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
             remark_class.append("Thematischer Zwischenruf")
@@ -231,7 +235,6 @@ def get_remarks(
 
             remarking_parties = []
             list = element.split()
-            # print(list)
 
             index = list.index("[BÜNDNIS")
             try:
@@ -304,7 +307,7 @@ def get_remarks(
 
 def Preprocessing(document: Any) -> Generator[list, None, None]:
     """
-    Preprocessing of the text
+    General preprocessing of the text
     parameter: document (string)
     return: tuple of strings
     """
@@ -319,7 +322,7 @@ def Preprocessing(document: Any) -> Generator[list, None, None]:
         meeting_content,
     )
 
-    # Splitting text into talking points
+    # Splitting text into talking points (speeches)
     party_dict = {
         "(DIE LINKE):": [],
         "(AfD):": [],
@@ -345,13 +348,11 @@ def Preprocessing(document: Any) -> Generator[list, None, None]:
                 moderation_split = re.split(
                     "Präsident Dr. Wolfgang Schäuble:|Vizepräsident Dr. Hans-Peter Friedrich:",
                     party_dict[party][-1],
-                )
+                )  # This split is done to seperate ends of speeches that contain moderation by the President or Vice President of the Bundestag
                 party_dict[party][-1] = moderation_split[0]
                 break
 
-    # TODO: There is always only one none empty element in the list. Correct?
-    # No there are the speeches per party in the dictionary
-    for element in party_dict.values():
+    for element in party_dict.values():  # This catches noise in the Data
         element = re.sub(
             "Deutscher Bundestag[^>]+\(A\) \(B\) \(C\) \(D\)", "", str(element)
         )
@@ -394,7 +395,7 @@ def fill_elastic(
     publisher: str,
 ):
     """
-    Fills the elastic index with the data from the document
+    Fills the elastic index with the data from the document. Fills data about speeches made by different MPs
     """
     doc = {
         "Dokumentnummer": meeting_id,
@@ -432,7 +433,7 @@ def fill_elastic_remarks(
     cleaned_text: str,
 ):
     """
-    Fills the elastic index with the data from the document
+    Fills the elastic index with the data from the document. Only fills remarks.
     """
     doc = {
         "Dokumentnummer": meeting_id,
@@ -473,7 +474,7 @@ def fill_elastic_missing(
     missing_AFD: list,
 ):
     """
-    Fills the elastic index with the data from the document
+    Fills the elastic index with the data from the document. Only fills data about missing MPs
     """
     if (
         len(missing_DIELINKE) == 0
@@ -513,7 +514,7 @@ def fill_elastic_missing(
 
 def fill_loop(es: Elasticsearch, dictionary: dict):
     """
-    Fills the elastic index with the data from the document
+    Fills the elastic index with the data from the document. This is the Main loop calling all other fill functions
     """
     for document in dictionary["documents"]:
         if "text" not in document:
@@ -614,6 +615,7 @@ def fill_loop(es: Elasticsearch, dictionary: dict):
                 es, element, name_speaker, meeting_id, party, date, title, publisher
             )
 
+    # Refresh Indeces to update Elasticsearch Information
     es.indices.refresh(index=index_protokolle)
     es.indices.refresh(index=missing_index)
     es.indices.refresh(index=index_remarks)
@@ -657,7 +659,6 @@ if __name__ == "__main__":
     # define api url to get all plenary protocols
     api_url = "https://search.dip.bundestag.de/api/v1/plenarprotokoll-text?f.datum.start=2021-09-26&apikey=ECrwIai.ErBmVaihLIzqiqu9DqNoVFVvUysTzDwuOo"
 
-    # delete_elastic_index() # ggf. vorhandener Index löschen
     response = requests.get(api_url)
 
     dictionary = response.json()
@@ -669,6 +670,8 @@ if __name__ == "__main__":
 
     oldCursor = ""
     cursor = dictionary["cursor"]
+
+    # Pulls Files in Batches from the Bundestag API
 
     while len(cursor) > 0 and cursor != oldCursor:  # wenn neu = alt dann ende
         cursor = re.sub("\/", "%2F", cursor)

@@ -5,9 +5,9 @@ using Svelte(Kit), FastAPI and ElasticSearch
 
 ## Team Members:
 
-Björn Bulkens (bjoern.bulkens@stud.uni-heidelberg.de) Klemens Gerber
-(klemens.gerber@stud.uni-heidelberg.de) Daniel M. Knorr
-(ax280@stud.uni-heidelberg.de)
+* Björn Bulkens (bjoern.bulkens@stud.uni-heidelberg.de)  3717920
+* Klemens Gerber (klemens.gerber@stud.uni-heidelberg.de) 3716694
+* Daniel M. Knorr (ax280@stud.uni-heidelberg.de) 3727033
 
 # How to use this project
 

@@ -22,6 +22,14 @@ The second n (PlenNarylictics) stands for natural-language-processing ;)
    the 50 to what ever amount of seconds ES needs to initialise)
 4. You reach the frontend on localhost:3000, the backend on localhost:8080 and
    Kibana on localhost:5601 (all exposed to your PC)
+  
+ After you have run Docker compose, the script will start pulling and loading plenary transcripts immediately. If you should recieve an error notice, that an Index is missing in Elasticsearch, please run the following commands via cmd to create the indexes that are missing:
+ 
+* curl -X PUT "localhost:9200/missing_mps?pretty"
+* curl -X PUT "localhost:9200/remarks?pretty"
+* curl -X PUT "localhost:9200/speeches?pretty"
+
+For more Information about the setup of our application, please refer to the report.
 
 # Data Processing
 
@@ -30,7 +38,7 @@ The second n (PlenNarylictics) stands for natural-language-processing ;)
 - Extract data about missing MPs from the XML Files
 - Extract data about comments and other reactions from the plenary from the XML
   files
-- Split the XML files in a way, that enables easy querying in elasticseach
+- Split the XML files in a way, that enables easy querying in elasticseach (The Files are split into speeches by different persons)
 
 ## Frontend
 
@@ -73,6 +81,8 @@ The following steps were taken to preprocess the Data:
 -
   2. Splitting into different parts (preamble, actual discussions, additional
      content)
+-
+  3. Mapping speeches and reactions to parties and Party Members
 
 The preprocessing of the data was actually a smaller part of the data extraciton
 process, than making ourselves familiar with the differences in text structure.
@@ -95,24 +105,6 @@ The statistic was extracted from the elasticsearch dashboard.
 
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 
-# Instructions for running the Code
-
-1. Make sure docker is running on your system
-2. In the Project directory, run docker compose build
-3. In the Project directory, run docker compose up
-4. The Project parts are available on the following ports:
-  * Elasticsearch: localhost:9200
-  * Kibana: localhost:5601
-  * Frontend: localhost:3000
-  * Swagger UI: localhost:8080
-  
- After you have run Docker compose, the script will start pulling and loading plenary transcripts immediately. If you should recieve an error notice, that an Index is missing in Elasticsearch, please run the following commands via cmd to create the indexes that are missing:
- 
-* curl -X PUT "localhost:9200/missing_mps?pretty"
-* curl -X PUT "localhost:9200/remarks?pretty"
-* curl -X PUT "localhost:9200/speeches?pretty"
-
-For more Information about the setup of our application, please refer to the report.
 
 
 ## Week 44/45
@@ -154,6 +146,9 @@ For more Information about the setup of our application, please refer to the rep
 - Getting Pancake setup
 
 ## Week 2
+
+* Working on Report
+* Fixing Bugs in Elasticsearch Connection
 
 
 ## Week 3/4

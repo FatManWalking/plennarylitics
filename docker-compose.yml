@@ -49,17 +49,17 @@ services:
     networks:
       - es-net
 
-  backend-setup:
-    container_name: backend-setup
-    build:
-      context: .
-      dockerfile: ./backend/Dockerfile
-    depends_on:
-      - backend
-    restart: "no"
-    entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"
-    networks:
-      - es-net
+  # backend-setup:
+  #   container_name: backend-setup
+  #   build:
+  #     context: .
+  #     dockerfile: ./backend/Dockerfile
+  #   depends_on:
+  #     - backend
+  #   restart: "no"
+  #   entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"
+  #   networks:
+  #     - es-net
 
   frontend:
     container_name: frontend

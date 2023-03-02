@@ -8,11 +8,12 @@ from elasticsearch import Elasticsearch
 from .routers import speech, missing, remark
 
 from .query_builder import Query
+from .utils import count_remarked_party
 
 # TODO: get indices as environment variables
-missing_index = "missing_v2"
-speech_index = "speeches_v2"
-remark_index = "remarks_v2"
+missing_index = "missing_v7"
+speech_index = "speeches_v7"
+remark_index = "remarks_v7"
 
 app = FastAPI()
 
@@ -169,6 +170,34 @@ def test(topic: str):
         print(f"query: {query.get_query()}")
         # Searches for all speeches between the given dates in the speech index
         res = es.search(index=speech_index, query=query.get_query()["query"])
+    else:
+        return {"Error": "Elasticsearch is not available"}
+
+    return res
+
+
+@app.get("/remarks")
+def get_remarks():
+    """
+    :return: response from Elasticsearch
+    """
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        query = Query()
+
+        # query the count of remarks by party
+        query.add_remarks_by_party()
+
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=remark_index, query=query.get_query()["query"])
+
+        # get the results
+        res = count_remarked_party(res)
+
     else:
         return {"Error": "Elasticsearch is not available"}
 

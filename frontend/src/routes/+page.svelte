@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Card from '$lib/daisy/Card.svelte';
+	import { Card } from '$lib/daisy';
 	import { preserveScroll, change_color } from '$lib/utils';
 	import { isDark } from '$lib/stores/theme.store';
 	import { onMount } from 'svelte';
@@ -81,7 +81,7 @@
 				</div>
 
 				<div id="slide3" class="carousel-item relative w-full">
-					<Card klass={textcolor}>
+					<Card klass={textcolor} link="/remarks">
 						<figure slot="image">
 							<img
 								src="https://www.bundestag.de/resource/image/865170/16x9/624/351/d8a1b48fa67f30863d6ddd44ab2a39a1/6CB19B68D6099747545D197B19A7F4F3/kw42_konstituierende_sitzung_bild_bas_rede.jpg"

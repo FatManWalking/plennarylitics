@@ -17,6 +17,8 @@
 	import FusionCharts from 'fusioncharts';
 	import SvelteFC, { fcRoot } from 'svelte-fusioncharts';
 
+	fcRoot(FusionCharts, Charts, FusionTheme);
+
 	// use active filter as body for get request
 	async function search() {
 		const data: ESResult = await get('missing_mp/Corinna');
@@ -51,20 +53,21 @@
 		},
 		data: [
 			{
-				label: 'NB0003',
+				label: 'AFD',
 				value: '12'
 			},
 			{
-				label: 'UE0004',
+				label: 'AFD fehlt',
 				value: '8'
 			}
 		]
 	};
 	let chartConfig = {
-		type: 'pie3d',
+		type: 'pie2d',
 		width: '100%',
 		height: '100%',
-		dataFormat: 'json',
+
+		renderAt: 'chart-container',
 		dataSource: dataSource
 	};
 </script>

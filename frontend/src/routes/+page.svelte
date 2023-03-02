@@ -20,6 +20,7 @@
 
 		// trigger is dark mode
 		$isDark = true;
+		textcolor = change_color(!$isDark);
 	});
 </script>
 

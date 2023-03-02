@@ -10,37 +10,56 @@
 	import type { ESDocument, ESResult } from '$lib/types';
 	import { onMount } from 'svelte';
 
-	interface Speech {
-		speaker: string;
-		text: string;
+	// get the active filter from the query
+	export let active_filter: {
+		keyword: string;
 		party: string;
-		date: Date;
-	}
-
-	let time = dayjs().format('MMM DD, YYYY');
-
-	let speeches: Speech[] = [
-		{
-			speaker: 'Max Mustermann',
-			party: 'CDU',
-			date: new Date(),
-			text: 'Est at et at ut lorem eirmod nostrud lorem eu amet. Diam exerci elitr sit eum eos ut diam ad duo et sea stet. Sea kasd diam. Lorem iusto amet takimata. Justo magna amet at vero delenit odio option dolor. Diam est takimata eos delenit consetetur sit ipsum accusam dignissim at sed. Praesent lorem luptatum in dolor magna clita kasd ut dolore rebum nibh stet et diam duo diam in. Imperdiet aliquip blandit nulla eleifend odio dolore euismod. Accumsan sanctus tempor tempor et feugiat. Eros lobortis et duo voluptua accumsan vel accumsan nonumy kasd dolor. Eirmod eos option aliquyam voluptua ad. Sanctus lorem vulputate amet tempor odio consetetur lobortis tempor kasd consetetur eirmod invidunt amet dolor. Gubergren diam eros autem eirmod kasd no sed diam vero dolore facer magna no at kasd.At duis ut exerci labore et magna sit vero eos erat invidunt nulla justo minim iusto est vero labore. Clita sit diam dolor. Rebum tincidunt eos elitr erat esse labore veniam sed elitr ipsum sed clita eos ea dolores esse tempor imperdiet. Lorem sanctus eum erat no eirmod dolor gubergren eros nulla clita takimata diam commodo et sanctus nulla. Erat dolor amet clita ipsum sed rebum dolor nisl consectetuer justo dolores dolore sea duis. Kasd vel in consetetur. Ullamcorper et eos sit zzril erat at. Et lorem suscipit no enim tincidunt. Sit tempor no vulputate sed lorem labore.'
-		},
-		{
-			speaker: 'Max Mustermann',
-			party: 'CDU',
-			date: new Date(),
-			text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl vel ultricies lacinia, nisl nisl aliquam nisl, eget aliquam nunc nisl eu nunc.'
-		}
-	];
+		speaker: string;
+		from_date: Date;
+		to_date: Date;
+	};
 
 	// the rsult currently displayed
 	let currentSpeech: number = 0;
 
-	let found_speeches: ESDocument[] = [];
 	// use active filter as body for get request
-	async function search() {
-		const data: ESResult = await get('test/Krankenhäuser');
+	async function queryES() {
+		let body = {
+			query: {
+				bool: {
+					must: [
+						{
+							match: {
+								keyword: active_filter.keyword
+							}
+						},
+						{
+							match: {
+								party: active_filter.party
+							}
+						},
+						{
+							match: {
+								speaker: active_filter.speaker
+							}
+						},
+						{
+							range: {
+								date: {
+									gte: active_filter.from_date,
+									lte: active_filter.to_date
+								}
+							}
+						}
+					]
+				}
+			}
+		};
+
+		// get the result from the backend
+		const data: ESResult = await post('speeches_v7/_search', body);
+
+		//const data: ESResult = await get('test/Krankenhäuser');
 
 		let found_speeches: ESDocument[] = data.hits.hits;
 		console.log(found_speeches);
@@ -48,7 +67,7 @@
 		return found_speeches;
 	}
 
-	let query = search();
+	let query = queryES();
 
 	// onMount(() => {
 	// 	search();

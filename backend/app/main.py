@@ -1,13 +1,14 @@
-from typing import Union, Dict, List, Tuple
+from typing import Union, Dict, List, Tuple, Optional, Any, Mapping
 from enum import Enum
 import json
 from fastapi import FastAPI
+from fastapi import Query as FastAPIQuery
 from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import Elasticsearch
 
 from .routers import speech, missing, remark
 
-from .query_builder import Query
+from .query_builder import Query as Query
 from .utils import count_remarked_party
 
 # TODO: get indices as environment variables
@@ -125,6 +126,49 @@ def search(index_name: str):
 
     # Number of hits we got back
     print(f"res: {res['hits']['total']['value']}")
+
+    return res
+
+
+@app.get("/speeches")
+def get_speeches(
+    keyword: Optional[str] = None,
+    party: Optional[str] = None,
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    speaker: Optional[str] = None,
+):
+    """
+    :param q: search query parameters
+    :return: response from Elasticsearch
+    """
+    parameters = {
+        "topic": keyword,
+        "party": party,
+        "date": [from_date, to_date],
+        "speaker": speaker,
+    }
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        query = Query()
+
+        # Add parameters to query
+        for key, value in parameters.items():
+            if value is not None:
+                if key == "date":
+                    query.add_date(from_date=value[0], to_date=value[1])
+                else:
+                    # dynamic method call
+                    getattr(query, f"add_{key}")(value)
+
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=speech_index, query=query.get_query()["query"])
+    else:
+        return {"Error": "Elasticsearch is not available"}
 
     return res
 

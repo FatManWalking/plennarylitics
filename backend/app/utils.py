@@ -1,3 +1,7 @@
+# Here we define some helper functions that are used in the app
+# Since we did not get the count query to work as we wanted, we decided to use the search query and count the results in the backend
+# This is not the most efficient way to do it and we should change it in the future
+
 from collections import defaultdict
 from typing import Dict
 

@@ -5,9 +5,9 @@ import re
 from typing import List, Dict, Tuple, Any, Generator
 
 # define index names
-index_protokolle = "speeches_v1"
-missing_index = "missing_v1"
-index_remarks = "remarks_v1"
+index_protokolle = "speeches_v2"
+missing_index = "missing_v2"
+index_remarks = "remarks_v2"
 
 counter = 0
 last_counter = 0

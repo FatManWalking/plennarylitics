@@ -3,6 +3,8 @@
 A full-stack application to analyse planary sessions in the German Bundestag
 using Svelte(Kit), FastAPI and ElasticSearch
 
+The second n (PlenNarylictics) stands for natural-language-processing ;)
+
 ## Team Members:
 
 * Björn Bulkens (bjoern.bulkens@stud.uni-heidelberg.de)  3717920

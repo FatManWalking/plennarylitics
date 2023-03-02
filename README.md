@@ -105,6 +105,18 @@ The statistic was extracted from the elasticsearch dashboard.
 
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 
+# Using the Project
+
+reden sortiert nacstichwörter in der rede, partei, sprecher, datums range
+
+You can user Plennarililytics to explore the Speeches made in the german Bundestag by the following criteria:
+
+* Keywords: You can search for specific Keywords to get Speeches, that contain this Keyword
+* Party: Filters the speeches by party belonging of the person giving the speech
+* Speaker: Filter the Speeches by the name of the speaker, giving the speech
+* Date Range: Filter the speeches by the timeframe the speeches were held in. To get speeches, that were held on a specific date, select the corresponding date as start and end date
+
+This filter functionality also applies to Reactions. You can filter these reactions by the same criteria listed above. 
 
 
 ## Week 44/45

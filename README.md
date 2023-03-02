@@ -11,6 +11,10 @@ The second n (PlenNarylictics) stands for natural-language-processing ;)
 * Klemens Gerber (klemens.gerber@stud.uni-heidelberg.de) 3716694
 * Daniel M. Knorr (ax280@stud.uni-heidelberg.de) 3727033
 
+# Motivation
+
+The motivation behind creating Plennarilytics was to provide people with a tool to easily analyze the parliamentary protocols of the German Bundestag. As a democracy, it's crucial for citizens to have access to information about what their elected representatives are doing on their behalf. However, understanding and analyzing parliamentary protocols can be a daunting task for many people. Plennarilytics aims to simplify this process by providing an easy-to-use platform where users can access and analyze this information in a clear and concise way. By providing this service, we hope to promote transparency and accountability in government, and ultimately empower citizens to engage more actively in the democratic process.
+
 # How to use this project
 
 1. Clone the repository and navigate to the created folder
@@ -105,7 +109,7 @@ The statistic was extracted from the elasticsearch dashboard.
 
 ![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
 
-# Using the Project
+# Using the Website
 
 reden sortiert nacstichwörter in der rede, partei, sprecher, datums range
 

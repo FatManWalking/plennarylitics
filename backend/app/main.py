@@ -36,6 +36,11 @@ headers = {"Access-Control-Allow-Origin": "*"}
 
 
 class Party(Enum):
+    """
+    Enum for parties
+    When we query by party we could use the following enum to make sure we only query for valid parties
+    """
+
     SPD = "SPD"
     CDUCSU = "CDU"
     GRUENE = "GRÜNE"
@@ -46,6 +51,10 @@ class Party(Enum):
 
 
 def get_es_client():
+    """
+    Establish connection to Elasticsearch
+    :return: Elasticsearch client
+    """
     return Elasticsearch(
         "http://elasticsearch:9200",
         verify_certs=False,
@@ -58,6 +67,10 @@ def get_es_client():
 # Tested
 @app.get("/")
 def read_root():
+    """
+    :return: Simple message to check if the API is up and running
+    Show available endpoints
+    """
     return {
         "Plennarylitics Backend": "Available",
         "Docs at": "localhost:8000/docs",

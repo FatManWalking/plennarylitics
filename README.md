@@ -138,3 +138,31 @@ The statistic was extracted from the elasticsearch dashboard.
 - Conception of Frontend Data Visualisations
 - Code Cleanup
 - Conception of interesting insights with the Data we currently have
+
+## Week 3/4
+* Working on Report
+* Frontend Creation
+* Bug fixing in Data extraction code
+
+## Week 5
+* Frontend Creation
+* Backend creation
+* Bug fixing in Data creation code
+
+## Week 6
+* Working on report
+* Backend creation
+
+## Week 7
+* Docker Bug Fixing
+* Gathering of Data Results
+
+## Week 8
+* Docker Bug Fixing
+* Fast API Endpoint creation
+* Presentation creation
+
+## Week 9
+* Frontend Finalization
+* Fast API Endpoint creation
+* Presentation recording

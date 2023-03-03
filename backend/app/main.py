@@ -12,9 +12,9 @@ from .query_builder import Query as Query
 from .utils import count_remarked_party
 
 # TODO: get indices as environment variables
-missing_index = "missing_v7"
-speech_index = "speeches_v7"
-remark_index = "remarks_v7"
+missing_index = "final_missing"
+speech_index = "final_speeches"
+remark_index = "final_remarks"
 
 app = FastAPI()
 

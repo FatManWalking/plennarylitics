@@ -125,9 +125,9 @@ plenary transcripts immediately. If you should recieve an error notice, that an
 Index is missing in Elasticsearch, please run the following commands via cmd to
 create the indexes that are missing:
 
-- curl -X PUT "localhost:9200/missing_mps?pretty"
-- curl -X PUT "localhost:9200/remarks?pretty"
-- curl -X PUT "localhost:9200/speeches?pretty"
+- curl -X PUT "localhost:9200/final_missing?pretty"
+- curl -X PUT "localhost:9200/final_remarks?pretty"
+- curl -X PUT "localhost:9200/final_speeches?pretty"
 
 For more Information about the setup of our application, please refer to the
 report.

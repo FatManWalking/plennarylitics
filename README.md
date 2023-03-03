@@ -91,7 +91,16 @@ missing MPs on a per party basis. In the following graphic, we have for example
 the top 20 missing MPs by Number for the AfD in the curtrent legislative period.
 The statistic was extracted from the elasticsearch dashboard.
 
-![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
+![Missing MPs of AfD](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/Top_20_missing_mpsAfD.png)
+
+Another interesting static is the amount and type of remark different parties make. Here the inner circle is the party that makes a remark to a speech and the outer circle is the type of remark they make:
+
+![Remarks by party and type](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/remark-party-type.png)
+
+And who has something to say when ever someone from another party makes a speech. Here the inner circle is the party that belongs to the speaker and the outer circle is the party that has something to add / makes remarks during the speech:
+
+![Remarks by party to party](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/remark-party-party.png)
+
 
 ## Week 44/45
 
@@ -138,3 +147,31 @@ The statistic was extracted from the elasticsearch dashboard.
 - Conception of Frontend Data Visualisations
 - Code Cleanup
 - Conception of interesting insights with the Data we currently have
+
+## Week 3/4
+* Working on Report
+* Frontend Creation
+* Bug fixing in Data extraction code
+
+## Week 5
+* Frontend Creation
+* Backend creation
+* Bug fixing in Data creation code
+
+## Week 6
+* Working on report
+* Backend creation
+
+## Week 7
+* Docker Bug Fixing
+* Gathering of Data Results
+
+## Week 8
+* Docker Bug Fixing
+* Fast API Endpoint creation
+* Presentation creation
+
+## Week 9
+* Frontend Finalization
+* Fast API Endpoint creation
+* Presentation recording

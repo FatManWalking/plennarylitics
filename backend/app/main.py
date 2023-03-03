@@ -1,18 +1,20 @@
-from typing import Union, Dict, List, Tuple
+from typing import Union, Dict, List, Tuple, Optional, Any, Mapping
 from enum import Enum
 import json
 from fastapi import FastAPI
+from fastapi import Query as FastAPIQuery
 from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import Elasticsearch
 
 from .routers import speech, missing, remark
 
-from .query_builder import Query
+from .query_builder import Query as Query
+from .utils import count_remarked_party
 
 # TODO: get indices as environment variables
-missing_index = "missing_v2"
-speech_index = "speeches_v2"
-remark_index = "remarks_v2"
+missing_index = "final_missing"
+speech_index = "final_speeches"
+remark_index = "final_remarks"
 
 app = FastAPI()
 
@@ -29,9 +31,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Simple header we can put in front of the API
+headers = {"Access-Control-Allow-Origin": "*"}
 
 
 class Party(Enum):
+    """
+    Enum for parties
+    When we query by party we could use the following enum to make sure we only query for valid parties
+    """
+
     SPD = "SPD"
     CDUCSU = "CDU"
     GRUENE = "GRÜNE"
@@ -41,11 +50,11 @@ class Party(Enum):
     FRAKTIONSLOS = "Fraktionslos"
 
 
-# Simple header we can put in front of the API
-headers = {"Access-Control-Allow-Origin": "*"}
-
-
 def get_es_client():
+    """
+    Establish connection to Elasticsearch
+    :return: Elasticsearch client
+    """
     return Elasticsearch(
         "http://elasticsearch:9200",
         verify_certs=False,
@@ -58,6 +67,10 @@ def get_es_client():
 # Tested
 @app.get("/")
 def read_root():
+    """
+    :return: Simple message to check if the API is up and running
+    Show available endpoints
+    """
     return {
         "Plennarylitics Backend": "Available",
         "Docs at": "localhost:8000/docs",
@@ -128,6 +141,74 @@ def search(index_name: str):
     return res
 
 
+# TESTED
+@app.get("/test/{topic}")
+def test(topic: str):
+    """
+    :param topic: topic to be queried
+    :return: response from Elasticsearch
+    """
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        query = Query()
+        query.add_topic(topic=topic)
+
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=speech_index, query=query.get_query()["query"])
+    else:
+        return {"Error": "Elasticsearch is not available"}
+
+    return res
+
+
+# TESTED
+@app.get("/speeches")
+def get_speeches(
+    keyword: Optional[str] = None,
+    party: Optional[str] = None,
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    speaker: Optional[str] = None,
+):
+    """
+    :param q: search query parameters
+    :return: response from Elasticsearch
+    """
+    parameters = {
+        "topic": keyword,
+        "party": party,
+        "date": [from_date, to_date],
+        "speaker": speaker,
+    }
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        query = Query()
+
+        # Add parameters to query
+        for key, value in parameters.items():
+            if value is not None:
+                if key == "date":
+                    query.add_date(from_date=value[0], to_date=value[1])
+                else:
+                    # dynamic method call
+                    getattr(query, f"add_{key}")(value)
+
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=speech_index, query=query.get_query()["query"])
+    else:
+        return {"Error": "Elasticsearch is not available"}
+
+    return res
+
+
 # Tested [speeches_v2]
 @app.get("/test_querybuilder/{from_date}/{to_date}")
 def test_querybuilder(from_date: str, to_date: str):
@@ -152,10 +233,80 @@ def test_querybuilder(from_date: str, to_date: str):
     return res
 
 
-@app.get("/test/{topic}")
-def test(topic: str):
+@app.get("/remarks")
+def get_remarks():
     """
-    :param topic: topic to be queried
+    :return: response from Elasticsearch
+    """
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+
+        query = {
+            "aggs": {
+                "0": {
+                    "terms": {
+                        "field": "Party Remarking Person.keyword",
+                        "order": {"_count": "desc"},
+                        "size": 8,
+                    },
+                    "aggs": {
+                        "1": {
+                            "terms": {
+                                "field": "Partei des Sprechers der Rede.keyword",
+                                "order": {"_count": "desc"},
+                                "size": 8,
+                            }
+                        }
+                    },
+                }
+            },
+            "size": 0,
+            "script_fields": {},
+            "stored_fields": ["*"],
+            "runtime_mappings": {},
+            "query": {
+                "bool": {
+                    "must": [],
+                    "filter": [
+                        {
+                            "range": {
+                                "Datum": {
+                                    "format": "strict_date_optional_time",
+                                    "gte": "2008-03-03T13:14:06.395Z",
+                                    "lte": "2023-03-03T13:14:06.395Z",
+                                }
+                            }
+                        }
+                    ],
+                    "should": [],
+                    "must_not": [
+                        {"match_phrase": {"Party Remarking Person.keyword": "None"}}
+                    ],
+                }
+            },
+        }
+
+        # Log the query
+        print(f"query: {query}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=remark_index, query=query)
+
+        # get the results
+        # res = count_remarked_party(res)
+
+    else:
+        return {"Error": "Elasticsearch is not available"}
+
+    return res
+
+
+# Tested [missing_v2]
+@app.get("/missing_mp/{mp_name}")
+def test_mp(mp_name: str):
+    """
+    :param mp_name: name of the MP to be queried
     :return: response from Elasticsearch
     """
 
@@ -163,62 +314,14 @@ def test(topic: str):
     es = get_es_client()
     if es is not None:
         query = Query()
-        query.add_topic(topic=topic)
+        query.add_missing_mp_name(mp_name=mp_name)
 
         # Log the query
         print(f"query: {query.get_query()}")
         # Searches for all speeches between the given dates in the speech index
-        res = es.search(index=speech_index, query=query.get_query()["query"])
+        res = es.search(index=missing_index, query=query.get_query()["query"])
     else:
         return {"Error": "Elasticsearch is not available"}
-
-    return res
-
-
-@app.get("/get_missing/{mp_name}")
-def missing_mp(mp_name: str):
-    """
-    :param index_name: name of the index to be queried
-    :return: response from Elasticsearch
-    """
-
-    es = get_es_client()
-    if es is not None:
-        # Query to find all documents where the selected MP is missing
-        search_object = {
-            "multi_match": {
-                "query": mp_name,
-                "type": "phrase_prefix",
-                "fields": [
-                    "missing_AFD",
-                    "missing_CDUCSU",
-                    "missing_DIELINKE",
-                    "missing_FDP",
-                    "missing_SPD",
-                    "missing_GRUENE",
-                    "missing_FRAKTIONSLOS",
-                ],
-            },
-            "highlight": {
-                "fields": {
-                    "missing_AFD": {},
-                    "missing_CDUCSU": {},
-                    "missing_DIELINKE": {},
-                    "missing_FDP": {},
-                    "missing_SPD": {},
-                    "missing_GRUENE": {},
-                    "missing_FRAKTIONSLOS": {},
-                }
-            },
-            "size": 10000,
-        }
-
-        res = es.search(index=missing_index, query=search_object)
-    else:
-        return {"Error": "Elasticsearch is not available"}
-
-    # Number of hits we got back
-    print(f"res: {res}")
 
     return res
 
@@ -243,7 +346,6 @@ def missing_date(date: str):
         return {}
 
     # Number of hits we got back
-    print(f"res: {res['hits']['total']['value']}")
 
     return res
 
@@ -391,7 +493,7 @@ def missing_party(party_name: str):
     # Test query
     es = get_es_client()
     if es is not None:
-        if party_name == "CDU/CSU":
+        if party_name == "CDU":
             search_object = {
                 "query": {"multi_match": {"fields": ["missing_CDUCSU"], "size": 10000}},
                 "size": 0,
@@ -431,13 +533,16 @@ def missing_party(party_name: str):
                 "size": 0,
             }
 
-            res = es.search(index="bjoerns_test_missing", body=search_object)
+            res = es.search(index=missing_index, body=search_object)
+        else:
+            res = {"Error": "Party not found"}
+
     else:
         print("Elasticsearch is not available")
+        res = {"Error": "Elasticsearch is not available"}
         return {}
 
     # Number of hits we got back
-    print(f"res: {res['hits']['total']['value']}")
 
     return res
 
@@ -464,7 +569,7 @@ def speech_speaker(mp_name: str):
             "size": 10000,
         }
 
-        res = es.search(index="bjoerns_test_speeches", body=search_object)
+        res = es.search(index=speech_index, body=search_object)
     else:
         print("Elasticsearch is not available")
         return {}
@@ -497,7 +602,7 @@ def speech_party(party_name: str):
             "size": 10000,
         }
 
-        res = es.search(index="bjoerns_test_speeches", body=search_object)
+        res = es.search(index=speech_index, body=search_object)
     else:
         print("Elasticsearch is not available")
         return {}
@@ -521,7 +626,7 @@ def speech_date(date: str):
     if es is not None:
         search_object = {"query": {"range": {"Datum": {"gte": date}}}}
 
-        res = es.search(index="bjoerns_test_speeches", body=search_object)
+        res = es.search(index=speech_index, body=search_object)
     else:
         print("Elasticsearch is not available")
         return {}

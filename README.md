@@ -7,13 +7,35 @@ The second n (PlenNarylictics) stands for natural-language-processing ;)
 
 ## Team Members:
 
-* Björn Bulkens (bjoern.bulkens@stud.uni-heidelberg.de)  3717920
-* Klemens Gerber (klemens.gerber@stud.uni-heidelberg.de) 3716694
-* Daniel M. Knorr (ax280@stud.uni-heidelberg.de) 3727033
+- Björn Bulkens (bjoern.bulkens@stud.uni-heidelberg.de) 3717920
+- Klemens Gerber (klemens.gerber@stud.uni-heidelberg.de) 3716694
+- Daniel M. Knorr (ax280@stud.uni-heidelberg.de) 3727033
 
 # Motivation
 
-The motivation behind creating Plennarilytics was to provide people with a tool to easily analyze the parliamentary protocols of the German Bundestag. As a democracy, it's crucial for citizens to have access to information about what their elected representatives are doing on their behalf. However, understanding and analyzing parliamentary protocols can be a daunting task for many people. Plennarilytics aims to simplify this process by providing an easy-to-use platform where users can access and analyze this information in a clear and concise way. By providing this service, we hope to promote transparency and accountability in government, and ultimately empower citizens to engage more actively in the democratic process.
+The motivation behind creating Plennarilytics was to provide people with a tool
+to easily analyze the parliamentary protocols of the German Bundestag. As a
+democracy, it's crucial for citizens to have access to information about what
+their elected representatives are doing on their behalf. However, understanding
+and analyzing parliamentary protocols can be a daunting task for many people.
+Plennarilytics aims to simplify this process by providing an easy-to-use
+platform where users can access and analyze this information in a clear and
+concise way. By providing this service, we hope to promote transparency and
+accountability in government, and ultimately empower citizens to engage more
+actively in the democratic process.
+
+# Motivation
+
+The motivation behind creating Plennarilytics was to provide people with a tool
+to easily analyze the parliamentary protocols of the German Bundestag. As a
+democracy, it's crucial for citizens to have access to information about what
+their elected representatives are doing on their behalf. However, understanding
+and analyzing parliamentary protocols can be a daunting task for many people.
+Plennarilytics aims to simplify this process by providing an easy-to-use
+platform where users can access and analyze this information in a clear and
+concise way. By providing this service, we hope to promote transparency and
+accountability in government, and ultimately empower citizens to engage more
+actively in the democratic process.
 
 # How to use this project
 
@@ -24,16 +46,24 @@ The motivation behind creating Plennarilytics was to provide people with a tool 
    in 50 seconds feel free to increase the delay in the entrypoint
    `entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"` (increase
    the 50 to what ever amount of seconds ES needs to initialise)
-4. You reach the frontend on localhost:3000, the backend on localhost:8080 and
-   Kibana on localhost:5601 (all exposed to your PC)
-  
- After you have run Docker compose, the script will start pulling and loading plenary transcripts immediately. If you should recieve an error notice, that an Index is missing in Elasticsearch, please run the following commands via cmd to create the indexes that are missing:
- 
-* curl -X PUT "localhost:9200/missing_mps?pretty"
-* curl -X PUT "localhost:9200/remarks?pretty"
-* curl -X PUT "localhost:9200/speeches?pretty"
+4. The Project parts are available on the following ports:
 
-For more Information about the setup of our application, please refer to the report.
+- Elasticsearch: localhost:9200
+- Kibana: localhost:5601
+- Frontend: localhost:3000
+- Swagger UI: localhost:8080
+
+After you have run Docker compose, the script will start pulling and loading
+plenary transcripts immediately. If you should recieve an error notice, that an
+Index is missing in Elasticsearch, please run the following commands via cmd to
+create the indexes that are missing:
+
+- curl -X PUT "localhost:9200/final_missing?pretty"
+- curl -X PUT "localhost:9200/final_remarks?pretty"
+- curl -X PUT "localhost:9200/final_speeches?pretty"
+
+For more Information about the setup of our application, please refer to the
+report.
 
 # Data Processing
 
@@ -42,7 +72,8 @@ For more Information about the setup of our application, please refer to the rep
 - Extract data about missing MPs from the XML Files
 - Extract data about comments and other reactions from the plenary from the XML
   files
-- Split the XML files in a way, that enables easy querying in elasticseach (The Files are split into speeches by different persons)
+- Split the XML files in a way, that enables easy querying in elasticseach (The
+  Files are split into speeches by different persons)
 
 ## Frontend
 
@@ -107,21 +138,48 @@ missing MPs on a per party basis. In the following graphic, we have for example
 the top 20 missing MPs by Number for the AfD in the curtrent legislative period.
 The statistic was extracted from the elasticsearch dashboard.
 
-![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
+![Missing MPs of AfD](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/Top_20_missing_mpsAfD.png)
+
+Another interesting static is the amount and type of remark different parties
+make. Here the inner circle is the party that makes a remark to a speech and the
+outer circle is the type of remark they make:
+
+![Remarks by party and type](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/remark-party-type.png)
+
+And who has something to say when ever someone from another party makes a
+speech. Here the inner circle is the party that belongs to the speaker and the
+outer circle is the party that has something to add / makes remarks during the
+speech:
+
+![Remarks by party to party](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/remark-party-party.png)
 
 # Using the Website
 
-reden sortiert nacstichwörter in der rede, partei, sprecher, datums range
+You can user Plennarililytics to explore the Speeches made in the german
+Bundestag by the following criteria:
 
-You can user Plennarililytics to explore the Speeches made in the german Bundestag by the following criteria:
+- Keywords: You can search for specific Keywords to get Speeches, that contain
+  this Keyword
+- Party: Filters the speeches by party belonging of the person giving the speech
+- Speaker: Filter the Speeches by the name of the speaker, giving the speech
+- Date Range: Filter the speeches by the timeframe the speeches were held in. To
+  get speeches, that were held on a specific date, select the corresponding date
+  as start and end date
 
-* Keywords: You can search for specific Keywords to get Speeches, that contain this Keyword
-* Party: Filters the speeches by party belonging of the person giving the speech
-* Speaker: Filter the Speeches by the name of the speaker, giving the speech
-* Date Range: Filter the speeches by the timeframe the speeches were held in. To get speeches, that were held on a specific date, select the corresponding date as start and end date
+# Limitations
 
-This filter functionality also applies to Reactions. You can filter these reactions by the same criteria listed above. 
-
+Our Goal was to provide a way to analyze the open data provided by the
+Bundestag. While this goal has been reached for the most part, we faced some
+technical difficulties while implementing this functionality in our frontend.
+The user is able to flexibly search the speeches made by MPs in the Bundestag
+and to analyze them according to his or her personal interest. It is also
+possible to access the data about missing MPs and remarks from the Swagger UI
+(localhost:8080/docs) but we were not able to integrate these datastreams into
+our Svelte frontend with reasonable effort. The data can still be accessed via
+elasticsearch or the Swagger UI, but we were not able to reach our goal
+entirely. Also there are some additional endpoints available in the swagger UI
+that can be tested and used for some further insights into our data. Feel free
+to try them and explore the inner works of the Bundestag!
 
 ## Week 44/45
 
@@ -163,34 +221,39 @@ This filter functionality also applies to Reactions. You can filter these reacti
 
 ## Week 2
 
-* Working on Report
-* Fixing Bugs in Elasticsearch Connection
-
+- Working on Report
+- Fixing Bugs in Elasticsearch Connection
 
 ## Week 3/4
-* Working on Report
-* Frontend Creation
-* Bug fixing in Data extraction code
+
+- Working on Report
+- Frontend Creation
+- Bug fixing in Data extraction code
 
 ## Week 5
-* Frontend Creation
-* Backend creation
-* Bug fixing in Data creation code
+
+- Frontend Creation
+- Backend creation
+- Bug fixing in Data creation code
 
 ## Week 6
-* Working on report
-* Backend creation
+
+- Working on report
+- Backend creation
 
 ## Week 7
-* Docker Bug Fixing
-* Gathering of Data Results
+
+- Docker Bug Fixing
+- Gathering of Data Results
 
 ## Week 8
-* Docker Bug Fixing
-* Fast API Endpoint creation
-* Presentation creation
+
+- Docker Bug Fixing
+- Fast API Endpoint creation
+- Presentation creation
 
 ## Week 9
-* Frontend Finalization
-* Fast API Endpoint creation
-* Presentation recording
+
+- Frontend Finalization
+- Fast API Endpoint creation
+- Presentation recording

@@ -5,9 +5,9 @@ import re
 from typing import List, Dict, Tuple, Any, Generator
 
 # define index names
-index_protokolle = "speeches_v2"
-missing_index = "missing_v2"
-index_remarks = "remarks_v2"
+index_protokolle = "final_speeches"
+missing_index = "final_missing"
+index_remarks = "final_remarks"
 
 # define helper variables
 counter = 0
@@ -222,9 +222,14 @@ def get_remarks(
                 except ValueError as e:
 
                     remarking_persons = "None"
+                except UnboundLocalError as e:
+                    print(f"UnboundLocalError: {e} in {element}")
 
+            try:
                 cleaned_list = element.split(party)
                 cleaned_text = cleaned_list.pop()
+            except UnboundLocalError as e:
+                print(f"UnboundLocalError: {e} in {element}")
 
         # The Following is done to catch different variations of Party names that are used in the plenary protocols
 

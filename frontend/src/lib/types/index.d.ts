@@ -2,7 +2,7 @@ interface ESDocument {
     _id: string;
     _index: string;
     _score: number;
-    _source: object;
+    _source: { Datum: string[], Partei: string, Sprecher: string[], Text: string };
     _type: string;
     _ignored: string[];
 }

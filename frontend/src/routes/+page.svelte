@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Card from '$lib/daisy/card.svelte';
+	import { Card } from '$lib/daisy';
 	import { preserveScroll, change_color } from '$lib/utils';
 	import { isDark } from '$lib/stores/theme.store';
 	import { onMount } from 'svelte';
@@ -20,6 +20,7 @@
 
 		// trigger is dark mode
 		$isDark = true;
+		textcolor = change_color(!$isDark);
 	});
 </script>
 
@@ -39,6 +40,11 @@
 			<div class="carousel carousel-center rounded-box pt-4">
 				<div id="slide1" class="carousel-item relative w-full">
 					<Card klass={textcolor} link="/speech">
+						<h2 slot="title">
+							Reden
+							<div class="badge badge-secondary">NEW</div>
+						</h2>
+						<p slot="description">Schlage Plenardebatten nach Datum, Thema oder Sprecher nach.</p>
 						<p slot="button">Zu den Reden</p>
 					</Card>
 					<div
@@ -76,7 +82,7 @@
 				</div>
 
 				<div id="slide3" class="carousel-item relative w-full">
-					<Card klass={textcolor}>
+					<Card klass={textcolor} link="/remarks">
 						<figure slot="image">
 							<img
 								src="https://www.bundestag.de/resource/image/865170/16x9/624/351/d8a1b48fa67f30863d6ddd44ab2a39a1/6CB19B68D6099747545D197B19A7F4F3/kw42_konstituierende_sitzung_bild_bas_rede.jpg"

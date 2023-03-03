@@ -18,21 +18,23 @@
 	});
 </script>
 
-<Nav />
-<slot />
-<footer class="footer p-10 bg-neutral text-neutral-content inset-x-0 bottom-0">
-	<div>
-		<span class="footer-title">Company</span>
-		<a class="link link-hover" href="/">About us</a>
-		<a class="link link-hover" href="/">Contact</a>
-	</div>
-	<div>
-		<span class="footer-title">Legal</span>
-		<a class="link link-hover" href="/">Terms of use</a>
-		<a class="link link-hover" href="/">Privacy policy</a>
-		<a class="link link-hover" href="/">Cookie policy</a>
-	</div>
-</footer>
+<div class="flex flex-col">
+	<Nav klass="basis 1/6 shrink-0" />
+	<slot class="basis 4/6 shrink-0" />
+	<footer class="footer p-10 bg-neutral text-neutral-content inset-x-0 bottom-0 basis-1/6 shrink-0">
+		<div>
+			<span class="footer-title">Company</span>
+			<a class="link link-hover" href="/">About us</a>
+			<a class="link link-hover" href="/">Contact</a>
+		</div>
+		<div>
+			<span class="footer-title">Legal</span>
+			<a class="link link-hover" href="/">Terms of use</a>
+			<a class="link link-hover" href="/">Privacy policy</a>
+			<a class="link link-hover" href="/">Cookie policy</a>
+		</div>
+	</footer>
+</div>
 
 <style>
 </style>

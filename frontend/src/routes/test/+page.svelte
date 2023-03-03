@@ -1,4 +1,6 @@
 <script>
+	// In this side we tested using pancake to create charts but ultimately could not get the ES queries to work with it since the data formatting was not working as expected.
+
 	import * as Pancake from '@sveltejs/pancake';
 	import { spring } from 'svelte/motion';
 	import { onMount } from 'svelte';

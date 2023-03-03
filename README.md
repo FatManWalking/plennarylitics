@@ -127,7 +127,7 @@ speech:
 
 # Limitations
 
-Our Goal was to provide a way to analyze the open data provided by the Bundestag. While this goal has been reached for the most part, we faced some technical difficulties while implementing this functionality in our frontend. The user is able to flexibly search the speeches made by MPs in the Bundestag and to analyze them according to his or her personal interest. It is also possible to access the data about missing MPs and remarks from the Swagger UI (localhost:8080/docs) but we were not able to integrate these datastreams into our Svelte frontend with reasonable effort. The data can still be accessed via elasticsearch or the Swagger UI, but we were not able to reach our goal entirely. 
+Our Goal was to provide a way to analyze the open data provided by the Bundestag. While this goal has been reached for the most part, we faced some technical difficulties while implementing this functionality in our frontend. The user is able to flexibly search the speeches made by MPs in the Bundestag and to analyze them according to his or her personal interest. It is also possible to access the data about missing MPs and remarks from the Swagger UI (localhost:8080/docs) but we were not able to integrate these datastreams into our Svelte frontend with reasonable effort. The data can still be accessed via elasticsearch or the Swagger UI, but we were not able to reach our goal entirely. Also there are some additional endpoints available in the swagger UI that can be tested and used for some further insights into our data. Feel free to try them and explore the inner works of the Bundestag!
 
 ## Week 44/45
 

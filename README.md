@@ -21,7 +21,7 @@ The second n (PlenNarylictics) stands for natural-language-processing ;)
    `entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"` (increase
    the 50 to what ever amount of seconds ES needs to initialise)
 4. You reach the frontend on localhost:3000, the backend on localhost:8080 and
-   Kibana on localhost:5601 (all exposed to your PC)
+   Kibana on localhost:5601 (all exposed to your PC or local system)
 
 # Data Processing
 

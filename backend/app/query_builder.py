@@ -30,7 +30,10 @@ class Query:
                         # { "term": {"missing_AFD": "1"} } # Exact match where there must be a 1 in the field missing_AFD
                     ],
                 },
-            }
+            },
+            "aggs": {
+                #    "uniqueDocs": {"terms": {"field": "_id"}}
+            }  # Collapsing is used to group the results by a specific field and e.g. only show the first result per group},
             # "aggs": { "types_count": ...   # Aggregations are used to group the results by a specific field and e.g. count the number of results per group
         }
 
@@ -69,13 +72,39 @@ class Query:
         """
         self.query["query"]["bool"]["must"].append({"match": {"Text": topic}})
 
+    # TESTED
+    def add_speaker(self, speaker: str):
+        """
+        Adds the speaker to the query
+        """
+        self.query["query"]["bool"]["must"].append({"match": {"Sprecher": speaker}})
+
+    # TESTED
+    def add_party(self, party: str):
+        """
+        Adds the party to the query
+        """
+        self.query["query"]["bool"]["must"].append({"match": {"Partei": party}})
+
+    def add_remarks_by_party(self):
+        """
+        Count the documents by "Remarking Parties"
+        """
+        self.query["aggs"] = {"types_count": {"terms": {"field": "Remarking_Party"}}}
+
+    def add_missing_all(self):
+        """
+        Adds a aggregation of of all missing mps to the query
+        """
+        pass
+
     # All MP related functions
 
     def add_missing_mp_name(self, mp_name: str):
         """
         Adds the MP name to the query
         """
-        self.query["query"]["bool"]["must"].append(
+        self.query["query"]["bool"]["filter"].append(
             {"multi_match": {"query": mp_name, "fields": ["missing_*"]}}
         )
 
@@ -91,7 +120,7 @@ class Query:
         """
         Adds the MP name to the query
         """
-        self.query["query"]["bool"]["must"].append(
+        self.query["query"].append(
             {"multi_match": {"query": mp_name, "fields": ["Sprecher der Rede"]}}
         )
 

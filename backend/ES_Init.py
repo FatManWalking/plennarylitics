@@ -5,9 +5,9 @@ import re
 from typing import List, Dict, Tuple, Any, Generator
 
 # define index names
-index_protokolle = "speeches_v2"
-missing_index = "missing_v2"
-index_remarks = "remarks_v2"
+index_protokolle = "speeches_v7"
+missing_index = "missing_v7"
+index_remarks = "remarks_v7"
 
 counter = 0
 last_counter = 0
@@ -220,9 +220,14 @@ def get_remarks(
                 except ValueError as e:
                     # print(e, "No remarkign Person found")
                     remarking_persons = "None"
+                except UnboundLocalError as e:
+                    print(f"UnboundLocalError: {e} in {element}")
 
+            try:
                 cleaned_list = element.split(party)
                 cleaned_text = cleaned_list.pop()
+            except UnboundLocalError as e:
+                print(f"UnboundLocalError: {e} in {element}")
 
         if "[BÜNDNIS 90/DIE GRÜNEN]:" in element:
             remark_class.append("Thematischer Zwischenruf")

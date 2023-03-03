@@ -1,18 +1,20 @@
-from typing import Union, Dict, List, Tuple
+from typing import Union, Dict, List, Tuple, Optional, Any, Mapping
 from enum import Enum
 import json
 from fastapi import FastAPI
+from fastapi import Query as FastAPIQuery
 from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import Elasticsearch
 
 from .routers import speech, missing, remark
 
-from .query_builder import Query
+from .query_builder import Query as Query
+from .utils import count_remarked_party
 
 # TODO: get indices as environment variables
-missing_index = "missing_v2"
-speech_index = "speeches_v2"
-remark_index = "remarks_v2"
+missing_index = "missing_v7"
+speech_index = "speeches_v7"
+remark_index = "remarks_v7"
 
 app = FastAPI()
 
@@ -29,6 +31,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Simple header we can put in front of the API
+headers = {"Access-Control-Allow-Origin": "*"}
 
 
 class Party(Enum):
@@ -39,10 +43,6 @@ class Party(Enum):
     DIELINKE = "DIE LINKE"
     AFD = "AfD"
     FRAKTIONSLOS = "Fraktionslos"
-
-
-# Simple header we can put in front of the API
-headers = {"Access-Control-Allow-Origin": "*"}
 
 
 def get_es_client():
@@ -128,6 +128,74 @@ def search(index_name: str):
     return res
 
 
+# TESTED
+@app.get("/test/{topic}")
+def test(topic: str):
+    """
+    :param topic: topic to be queried
+    :return: response from Elasticsearch
+    """
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        query = Query()
+        query.add_topic(topic=topic)
+
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=speech_index, query=query.get_query()["query"])
+    else:
+        return {"Error": "Elasticsearch is not available"}
+
+    return res
+
+
+# TESTED
+@app.get("/speeches")
+def get_speeches(
+    keyword: Optional[str] = None,
+    party: Optional[str] = None,
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    speaker: Optional[str] = None,
+):
+    """
+    :param q: search query parameters
+    :return: response from Elasticsearch
+    """
+    parameters = {
+        "topic": keyword,
+        "party": party,
+        "date": [from_date, to_date],
+        "speaker": speaker,
+    }
+
+    # Test query
+    es = get_es_client()
+    if es is not None:
+        query = Query()
+
+        # Add parameters to query
+        for key, value in parameters.items():
+            if value is not None:
+                if key == "date":
+                    query.add_date(from_date=value[0], to_date=value[1])
+                else:
+                    # dynamic method call
+                    getattr(query, f"add_{key}")(value)
+
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=speech_index, query=query.get_query()["query"])
+    else:
+        return {"Error": "Elasticsearch is not available"}
+
+    return res
+
+
 # Tested [speeches_v2]
 @app.get("/test_querybuilder/{from_date}/{to_date}")
 def test_querybuilder(from_date: str, to_date: str):
@@ -152,10 +220,9 @@ def test_querybuilder(from_date: str, to_date: str):
     return res
 
 
-@app.get("/test/{topic}")
-def test(topic: str):
+@app.get("/remarks")
+def get_remarks():
     """
-    :param topic: topic to be queried
     :return: response from Elasticsearch
     """
 
@@ -163,62 +230,44 @@ def test(topic: str):
     es = get_es_client()
     if es is not None:
         query = Query()
-        query.add_topic(topic=topic)
+
+        # query the count of remarks by party
+        query.add_remarks_by_party()
 
         # Log the query
         print(f"query: {query.get_query()}")
         # Searches for all speeches between the given dates in the speech index
-        res = es.search(index=speech_index, query=query.get_query()["query"])
+        res = es.search(index=remark_index, query=query.get_query()["query"])
+
+        # get the results
+        res = count_remarked_party(res)
+
     else:
         return {"Error": "Elasticsearch is not available"}
 
     return res
 
 
-@app.get("/get_missing/{mp_name}")
-def missing_mp(mp_name: str):
+# Tested [missing_v2]
+@app.get("/missing_mp/{mp_name}")
+def test_mp(mp_name: str):
     """
-    :param index_name: name of the index to be queried
+    :param mp_name: name of the MP to be queried
     :return: response from Elasticsearch
     """
 
+    # Test query
     es = get_es_client()
     if es is not None:
-        # Query to find all documents where the selected MP is missing
-        search_object = {
-            "multi_match": {
-                "query": mp_name,
-                "type": "phrase_prefix",
-                "fields": [
-                    "missing_AFD",
-                    "missing_CDUCSU",
-                    "missing_DIELINKE",
-                    "missing_FDP",
-                    "missing_SPD",
-                    "missing_GRUENE",
-                    "missing_FRAKTIONSLOS",
-                ],
-            },
-            "highlight": {
-                "fields": {
-                    "missing_AFD": {},
-                    "missing_CDUCSU": {},
-                    "missing_DIELINKE": {},
-                    "missing_FDP": {},
-                    "missing_SPD": {},
-                    "missing_GRUENE": {},
-                    "missing_FRAKTIONSLOS": {},
-                }
-            },
-            "size": 10000,
-        }
+        query = Query()
+        query.add_missing_mp_name(mp_name=mp_name)
 
-        res = es.search(index=missing_index, query=search_object)
+        # Log the query
+        print(f"query: {query.get_query()}")
+        # Searches for all speeches between the given dates in the speech index
+        res = es.search(index=missing_index, query=query.get_query()["query"])
     else:
         return {"Error": "Elasticsearch is not available"}
-
-    # Number of hits we got back
-    print(f"res: {res}")
 
     return res
 

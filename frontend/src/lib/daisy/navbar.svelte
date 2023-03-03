@@ -30,7 +30,7 @@
 				<li><a href="/">Homepage</a></li>
 				<li><a href="/speech">Reden</a></li>
 				<li><a href="/missing">Abwesenheit</a></li>
-				<li><a href="/interjection">Zwischenrufe</a></li>
+				<li><a href="/remarks">Zwischenrufe</a></li>
 				<li><a href="/about">Über uns</a></li>
 			</ul>
 		</div>

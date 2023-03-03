@@ -242,18 +242,59 @@ def get_remarks():
     # Test query
     es = get_es_client()
     if es is not None:
-        query = Query()
 
-        # query the count of remarks by party
-        query.add_remarks_by_party()
+        query = {
+            "aggs": {
+                "0": {
+                    "terms": {
+                        "field": "Party Remarking Person.keyword",
+                        "order": {"_count": "desc"},
+                        "size": 8,
+                    },
+                    "aggs": {
+                        "1": {
+                            "terms": {
+                                "field": "Partei des Sprechers der Rede.keyword",
+                                "order": {"_count": "desc"},
+                                "size": 8,
+                            }
+                        }
+                    },
+                }
+            },
+            "size": 0,
+            "script_fields": {},
+            "stored_fields": ["*"],
+            "runtime_mappings": {},
+            "query": {
+                "bool": {
+                    "must": [],
+                    "filter": [
+                        {
+                            "range": {
+                                "Datum": {
+                                    "format": "strict_date_optional_time",
+                                    "gte": "2008-03-03T13:14:06.395Z",
+                                    "lte": "2023-03-03T13:14:06.395Z",
+                                }
+                            }
+                        }
+                    ],
+                    "should": [],
+                    "must_not": [
+                        {"match_phrase": {"Party Remarking Person.keyword": "None"}}
+                    ],
+                }
+            },
+        }
 
         # Log the query
-        print(f"query: {query.get_query()}")
+        print(f"query: {query}")
         # Searches for all speeches between the given dates in the speech index
-        res = es.search(index=remark_index, query=query.get_query()["query"])
+        res = es.search(index=remark_index, query=query)
 
         # get the results
-        res = count_remarked_party(res)
+        # res = count_remarked_party(res)
 
     else:
         return {"Error": "Elasticsearch is not available"}
@@ -305,7 +346,6 @@ def missing_date(date: str):
         return {}
 
     # Number of hits we got back
-    print(f"res: {res['hits']['total']['value']}")
 
     return res
 
@@ -453,7 +493,7 @@ def missing_party(party_name: str):
     # Test query
     es = get_es_client()
     if es is not None:
-        if party_name == "CDU/CSU":
+        if party_name == "CDU":
             search_object = {
                 "query": {"multi_match": {"fields": ["missing_CDUCSU"], "size": 10000}},
                 "size": 0,
@@ -493,13 +533,16 @@ def missing_party(party_name: str):
                 "size": 0,
             }
 
-            res = es.search(index="bjoerns_test_missing", body=search_object)
+            res = es.search(index=missing_index, body=search_object)
+        else:
+            res = {"Error": "Party not found"}
+
     else:
         print("Elasticsearch is not available")
+        res = {"Error": "Elasticsearch is not available"}
         return {}
 
     # Number of hits we got back
-    print(f"res: {res['hits']['total']['value']}")
 
     return res
 
@@ -526,7 +569,7 @@ def speech_speaker(mp_name: str):
             "size": 10000,
         }
 
-        res = es.search(index="bjoerns_test_speeches", body=search_object)
+        res = es.search(index=speech_index, body=search_object)
     else:
         print("Elasticsearch is not available")
         return {}
@@ -559,7 +602,7 @@ def speech_party(party_name: str):
             "size": 10000,
         }
 
-        res = es.search(index="bjoerns_test_speeches", body=search_object)
+        res = es.search(index=speech_index, body=search_object)
     else:
         print("Elasticsearch is not available")
         return {}
@@ -583,7 +626,7 @@ def speech_date(date: str):
     if es is not None:
         search_object = {"query": {"range": {"Datum": {"gte": date}}}}
 
-        res = es.search(index="bjoerns_test_speeches", body=search_object)
+        res = es.search(index=speech_index, body=search_object)
     else:
         print("Elasticsearch is not available")
         return {}

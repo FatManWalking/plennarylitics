@@ -24,19 +24,6 @@ concise way. By providing this service, we hope to promote transparency and
 accountability in government, and ultimately empower citizens to engage more
 actively in the democratic process.
 
-# Motivation
-
-The motivation behind creating Plennarilytics was to provide people with a tool
-to easily analyze the parliamentary protocols of the German Bundestag. As a
-democracy, it's crucial for citizens to have access to information about what
-their elected representatives are doing on their behalf. However, understanding
-and analyzing parliamentary protocols can be a daunting task for many people.
-Plennarilytics aims to simplify this process by providing an easy-to-use
-platform where users can access and analyze this information in a clear and
-concise way. By providing this service, we hope to promote transparency and
-accountability in government, and ultimately empower citizens to engage more
-actively in the democratic process.
-
 # How to use this project
 
 1. Clone the repository and navigate to the created folder

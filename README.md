@@ -20,8 +20,24 @@ The second n (PlenNarylictics) stands for natural-language-processing ;)
    in 50 seconds feel free to increase the delay in the entrypoint
    `entrypoint: /bin/bash -c "sleep 50 && python /code/ES_Init.py"` (increase
    the 50 to what ever amount of seconds ES needs to initialise)
-4. You reach the frontend on localhost:3000, the backend on localhost:8080 and
-   Kibana on localhost:5601 (all exposed to your PC or local system)
+4. The Project parts are available on the following ports:
+
+- Elasticsearch: localhost:9200
+- Kibana: localhost:5601
+- Frontend: localhost:3000
+- Swagger UI: localhost:8080
+
+After you have run Docker compose, the script will start pulling and loading
+plenary transcripts immediately. If you should recieve an error notice, that an
+Index is missing in Elasticsearch, please run the following commands via cmd to
+create the indexes that are missing:
+
+- curl -X PUT "localhost:9200/final_missing?pretty"
+- curl -X PUT "localhost:9200/final_remarks?pretty"
+- curl -X PUT "localhost:9200/final_speeches?pretty"
+
+For more Information about the setup of our application, please refer to the
+report.
 
 # Data Processing
 
@@ -108,29 +124,10 @@ speech:
 
 ![Remarks by party to party](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/remark-party-party.png)
 
-# Instructions for running the Code
 
-1. Make sure docker is running on your system
-2. In the Project directory, run docker compose build
-3. In the Project directory, run docker compose up
-4. The Project parts are available on the following ports:
+# Limitations
 
-- Elasticsearch: localhost:9200
-- Kibana: localhost:5601
-- Frontend: localhost:3000
-- Swagger UI: localhost:8080
-
-After you have run Docker compose, the script will start pulling and loading
-plenary transcripts immediately. If you should recieve an error notice, that an
-Index is missing in Elasticsearch, please run the following commands via cmd to
-create the indexes that are missing:
-
-- curl -X PUT "localhost:9200/final_missing?pretty"
-- curl -X PUT "localhost:9200/final_remarks?pretty"
-- curl -X PUT "localhost:9200/final_speeches?pretty"
-
-For more Information about the setup of our application, please refer to the
-report.
+Our Goal was to provide a way to analyze the open data provided by the Bundestag. While this goal has been reached for the most part, we faced some technical difficulties while implementing this functionality in our frontend. The user is able to flexibly search the speeches made by MPs in the Bundestag and to analyze them according to his or her personal interest. It is also possible to access the data about missing MPs and remarks from the Swagger UI (localhost:8080/docs) but we were not able to integrate these datastreams into our Svelte frontend with reasonable effort. The data can still be accessed via elasticsearch or the Swagger UI, but we were not able to reach our goal entirely. Also there are some additional endpoints available in the swagger UI that can be tested and used for some further insights into our data. Feel free to try them and explore the inner works of the Bundestag!
 
 ## Week 44/45
 

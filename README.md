@@ -93,9 +93,14 @@ The statistic was extracted from the elasticsearch dashboard.
 
 ![Missing MPs of AfD](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/Top_20_missing_mpsAfD.png)
 
-Another interesting static is the amount and type of remark different parties make.
+Another interesting static is the amount and type of remark different parties make. Here the inner circle is the party that makes a remark to a speech and the outer circle is the type of remark they make:
 
-![Remarks by party and type]()
+![Remarks by party and type](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/remark-party-type.png)
+
+And who has something to say when ever someone from another party makes a speech. Here the inner circle is the party that belongs to the speaker and the outer circle is the party that has something to add / makes remarks during the speech:
+
+![Remarks by party to party](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/remark-party-party.png)
+
 
 ## Week 44/45
 

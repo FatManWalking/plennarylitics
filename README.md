@@ -91,7 +91,11 @@ missing MPs on a per party basis. In the following graphic, we have for example
 the top 20 missing MPs by Number for the AfD in the curtrent legislative period.
 The statistic was extracted from the elasticsearch dashboard.
 
-![alt text](https://github.com/FatManWalking/plennarylitics/blob/klemens-branch/Visualizations/Top_20_missing_mpsAfD.png)
+![Missing MPs of AfD](https://github.com/FatManWalking/plennarylitics/blob/display/Visualizations/Top_20_missing_mpsAfD.png)
+
+Another interesting static is the amount and type of remark different parties make.
+
+![Remarks by party and type]()
 
 ## Week 44/45
 
